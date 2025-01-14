@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chezzion App</title>
+    {% load static %}
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mx-auto register-box">
+        <div class="form-wrap">
+            <h3>Signup</h3>
+            <form action="" method="post">
+                {% csrf_token %}
+
+                {{form}}
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary mt-3" type="submit">Signup</button>
+                </div>
+            </form>
+
+            <a class="signup-link" href="{% url 'nonsap:login' %}">Login</a>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+    <script src="{% static 'assets/js/script.js' %}"></script>
+</body>
+
+</html>

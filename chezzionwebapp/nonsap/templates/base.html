@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Chezzion Web app{% endblock %}</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo-icon.png' %}">
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap Datepicker CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Timepicker CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'nonsap:home' %}">
+                <img class="nav-logo" src="{% static 'assets/img/logo-icon.png' %}" alt="logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            {% if user.is_authenticated %}
+            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                <ul class="navbar-nav mb-2 mb-lg-0 ">
+
+                    <li class="nav-item dropdown m-2">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Manage
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Warehouse Management</a></li>
+
+                            <li><a class="dropdown-item" href="{% url 'nonsap:dashboard' %}">Incident Management</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+                <form method="POST" action="{% url 'nonsap:logout' %}" class="d-flex align-items-center"
+                    id="logout-form">
+                    {% csrf_token %}
+                    {{ request.user.username }},
+                    <button type="button" class="btn btn-link " onclick="confirmLogout()">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                <ul class="navbar-nav mb-2 mb-lg-0 ">
+                    <li class="nav-item">
+                        <a class="nav-link " href="https://chezzion.com" target="_blank">
+                            About us
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+
+        </div>
+    </nav>
+
+    {% block start %}
+    {% endblock %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+    <script src="{% static 'assets/js/script.js' %}"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
+    <!-- Bootstrap Datepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/js/bootstrap-datepicker.min.js"></script>
+
+    <!-- Bootstrap Timepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Get the current date and time
+            var currentDate = new Date();
+            var currentTime = currentDate.getHours() + ':' + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes();
+
+            // Set the current date and time in the input fields
+            $('#datepicker').val(currentDate.toLocaleDateString()); // e.g. '1/14/2025'
+            $('#timepicker').val(currentTime); // e.g. '15:30'
+
+            // Initialize Datepicker
+            $('#datepicker').datepicker({
+                format: 'mm/dd/yyyy', // Adjust the format if needed
+                autoclose: true
+            });
+
+            // Initialize Timepicker
+            $('#timepicker').timepicker({
+                showMeridian: true, // Disable AM/PM (12-hour format)
+                minuteStep: 5, // Step for minutes
+                defaultTime: currentTime // Set current time as default
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Get the current date and time
+            var currentDate = new Date();
+            var currentTime = currentDate.getHours() + ':' + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes();
+
+            // Set the current date and time in the input fields
+            $('#reportdatepicker').val(currentDate.toLocaleDateString()); // e.g. '1/14/2025'
+            $('#reporttimepicker').val(currentTime); // e.g. '15:30'
+
+            // Initialize Datepicker
+            $('#reportdatepicker').datepicker({
+                format: 'mm/dd/yyyy', // Adjust the format if needed
+                autoclose: true
+            });
+
+            // Initialize Timepicker
+            $('#reporttimepicker').timepicker({
+                showMeridian: true, // Disable AM/PM (12-hour format)
+                minuteStep: 5, // Step for minutes
+                defaultTime: currentTime // Set current time as default
+            });
+        });
+    </script>
+
+</body>
+
+</html>

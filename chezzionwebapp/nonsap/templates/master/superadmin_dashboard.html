@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block start %}
+{% if user.is_authenticated and user.is_superuser %}
+<div class="container">
+    Hello super admin
+</div>
+{% else %}
+<div class="alert alert-danger mt-5">
+    <h4 class="text-center">You do not have permission to view this page.</h4>
+</div>
+{% endif %}
+{% endblock %}

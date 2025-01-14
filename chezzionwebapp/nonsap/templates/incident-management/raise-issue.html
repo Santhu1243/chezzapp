@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block start %}
+{% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+<div class="container">
+    <div class="col-md-8 col-sm-12 raise-issue-form mx-auto">
+        <form method="POST" enctype="multipart/form-data" class="form p-5" id="raise-issue">
+            {% csrf_token %}
+            <div class="container text-center">
+                <h2>Incident Issue Register Form</h2>
+            </div>
+
+            <!-- Issue Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="issue-title" class="form-label">
+                        Issue
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" name="issue" id="issue-title" class="form-control">
+                </div>
+            </div>
+
+            <!-- Issue Description Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="issue-description" class="form-label">
+                        Issue Description
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" name="description" id="issue-description" class="form-control">
+                </div>
+            </div>
+
+            <!-- Reporter Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="username" class="form-label">
+                        Reporter
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" name="username" id="username" value="{{ request.user.username }}"
+                        class="form-control" disabled>
+                </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="user-email" class="form-label">
+                        Email
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" name="email" id="user-email" value="{{ request.user.email }}"
+                        class="form-control">
+                </div>
+            </div>
+
+            <!-- Report Date Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="report-datepicker" class="form-label">
+                        Report Date
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" id="reportdatepicker" class="form-control">
+                </div>
+            </div>
+
+            <!-- Report Time Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="reporttimepicker" class="form-label">
+                        Report Time
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" id="reporttimepicker" class="form-control">
+                </div>
+            </div>
+
+            <!-- Attachments Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="issue-attachment" class="form-label">
+                        Attachments
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="file" name="attachment" id="issue-attachment" class="form-control">
+                </div>
+            </div>
+
+            <!-- Root Cause Field -->
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="root-cause" class="form-label">
+                        Root Cause
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12 ">
+                    <textarea name="root_cause" id="root-cause" class="form-control"
+                        placeholder="Root cause"></textarea>
+                </div>
+            </div>
+
+            <div class="sub-btn mt-5">
+                <button type="submit" class="btn btn-primary issue-sub-btn">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-danger mt-5">
+    <h4 class="text-center">You do not have permission to view this page.</h4>
+</div>
+{% endif %}
+{% endblock %}
