@@ -115,3 +115,9 @@ img.nav-logo {
     width: -webkit-fill-available;
     width: 100%;
 }
+
+/* staff dashboard */
+ul.admin-menu {
+    list-style: none;
+    /* color: black; */
+}

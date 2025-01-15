@@ -71,26 +71,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chezzionwebapp.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+#Database
+#https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # MySQL database engine
-        'NAME': 'chezzionapp',  # Your MySQL database name
-        'USER': 'root',  # Your MySQL username
-        'PASSWORD': 'Santhu@1243',  # Your MySQL password
-        'HOST': 'localhost',  # Database server, 'localhost' for local
-        'PORT': '3306',  # Default MySQL port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',  # MySQL database engine
+#         'NAME': 'chezzionapp',  # Your MySQL database name
+#         'USER': 'root',  # Your MySQL username
+#         'PASSWORD': 'Santhu@1243',  # Your MySQL password
+#         'HOST': 'localhost',  # Database server, 'localhost' for local
+#         'PORT': '3306',  # Default MySQL port
+#     }
+# }
 
 
 

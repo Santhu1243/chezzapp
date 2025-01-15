@@ -59,6 +59,12 @@
                             About us
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">{{
+                            request.user.username}}</button>
+
+                    </li>
                 </ul>
             </div>
             {% endif %}
@@ -66,7 +72,26 @@
         </div>
     </nav>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 id="offcanvasRightLabel">
+                {{ request.user.username }},</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="sidebar-menu">
+                <ul class="admin-menu">
+                    <li><a href="{% url 'nonsap:dashboard' %}"> <i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                    <li><a href="{% url 'nonsap:raise-issue' %}"><i class="fa-solid fa-list-check"></i> View Issues
+                            Assigned</a></li>
+                    <li><a href="{% url 'nonsap:logout' %}"> <i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
     {% block start %}
+
     {% endblock %}
 
     <script src="{% static 'assets/js/bootstrap.js' %}"></script>
