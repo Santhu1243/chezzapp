@@ -3,7 +3,7 @@
 {% block start %}
 {% if user.is_authenticated and user.is_staff %}
 <div class="container">
-    welcome to staff admin dashboard
+    Welcome <strong> {{ request.user.username }} </strong>
 </div>
 {% else %}
 <div class="alert alert-danger mt-5">
