@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -83,12 +85,12 @@ WSGI_APPLICATION = 'chezzionwebapp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # MySQL database engine
-        'NAME': 'chezzionapp',  # Your MySQL database name
-        'USER': 'root',  # Your MySQL username
-        'PASSWORD': 'Santhu@1243',  # Your MySQL password
-        'HOST': 'localhost',  # Database server, 'localhost' for local
-        'PORT': '3306',  # Default MySQL port
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'chezzionapp',  
+        'USER': 'root',  
+        'PASSWORD': 'Santhu@1243', 
+        'HOST': 'localhost',  
+        'PORT': '3306',  
     }
 }
 
