@@ -4,101 +4,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Chezzion Web app{% endblock %}</title>
+    <title>{% block title %}Chezzion Web App{% endblock %}</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo-icon.png' %}">
     <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="description" content="Chezzion Web App - Your staff dashboard and issue management system.">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    {% if user.is_authenticated %}
+    <nav class="navbar bg-light navbar-expand-md">
         <div class="container">
             <a class="navbar-brand" href="{% url 'nonsap:home' %}">
                 <img class="nav-logo" src="{% static 'assets/img/logo-icon.png' %}" alt="logo">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler text-dark custom-navbar" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#navbarOffcanvas" aria-controls="navbarOffcanvas" aria-expanded="false"
+                aria-label="Toggle navigation menu">
+                <i class="fa-solid fa-sliders"></i>
             </button>
-            {% if user.is_authenticated and user.staff %}
-            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-                <ul class="navbar-nav mb-2 mb-lg-0 ">
-
-                    <li class="nav-item dropdown m-2">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Manage
+            <div class="offcanvas offcanvas-end" id="navbarOffcanvas" tabindex="-1"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">{{ request.user.username }}</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="navbar-nav justify-content-end flex-grow-1 pe-3 text-dark">
+                        <a class="nav-item nav-link" href="{% url 'nonsap:admin-dashboard' %}">
+                            <span><i class="fa-solid fa-gauge"></i></span> Dashboard
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Warehouse Management</a></li>
-
-                            <li><a class="dropdown-item" href="{% url 'nonsap:dashboard' %}">View Tickets</a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-                <form method="POST" action="{% url 'nonsap:logout' %}" class="d-flex align-items-center"
-                    id="logout-form">
-                    {% csrf_token %}
-                    {{ request.user.username }},
-                    <button type="button" class="btn btn-link" onclick="confirmLogout()">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </form>
-            </div>
-            {% else %}
-            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-                <ul class="navbar-nav mb-2 mb-lg-0 ">
-                    <li class="nav-item">
-                        <a class="nav-link " href="https://chezzion.com" target="_blank">
-                            About us
+                        <a class="nav-item nav-link" href="{% url 'nonsap:viewassigned' %}">
+                            <span><i class="fa-solid fa-list-check"></i></span> View Issues Assigned
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">{{
-                            request.user.username}}</button>
 
-                    </li>
-                </ul>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="fa-solid fa-user"></i> {{ request.user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="{% url 'nonsap:logout' %}">
+                                        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+                                    </a></li>
+                            </ul>
+                        </li>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-
         </div>
     </nav>
+    {% endif %}
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-        <div class="offcanvas-header">
-            <h5 id="offcanvasRightLabel">
-                {{ request.user.username }},</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div class="sidebar-menu">
-                <ul class="admin-menu">
-                    <li><a href="{% url 'nonsap:dashboard' %}"> <i class="fa-solid fa-gauge"></i> Dashboard</a></li>
-                    <li><a href="{% url 'nonsap:raise-issue' %}"><i class="fa-solid fa-list-check"></i> View Issues
-                            Assigned</a></li>
-                    <li><a href="{% url 'nonsap:logout' %}"> <i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
     {% block start %}
-
     {% endblock %}
 
     <script src="{% static 'assets/js/bootstrap.js' %}"></script>
     <script src="{% static 'assets/js/script.js' %}"></script>
-
-
-
 </body>
 
 </html>

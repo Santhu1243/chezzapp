@@ -132,3 +132,7 @@ def raise_issue(request):
 @login_required
 def success(request):
     return render(request, 'incident-management/success.html')
+
+@login_required
+def viewassigned(request):
+    return render(request, 'admin/view-assigned.html')
