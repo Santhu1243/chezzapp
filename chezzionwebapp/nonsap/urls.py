@@ -14,6 +14,7 @@ urlpatterns = [
     path('incident-management/raise-issue/', views.raise_issue, name='raise-issue'),
     path('incident-management/success/', views.success, name='success'),
     path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
+    path('incident-management/status/', views.issuestatus, name='issuestatus'),
   
 ]
 

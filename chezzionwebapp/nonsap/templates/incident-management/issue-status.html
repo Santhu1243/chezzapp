@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block start %}
-{% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+{% if user.is_authenticated %}
 <div class="container">
     <div class="col-md-8 col-sm-12 raise-issue-form mx-auto">
         <form method="POST" enctype="multipart/form-data" class="form p-5" id="raise-issue">
@@ -18,7 +18,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="issue" id="issue-title" class="form-control">
+                    <input type="text" name="issue" id="issue-title" class="form-control" disabled>
                 </div>
             </div>
 
@@ -30,7 +30,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="description" id="issue-description" class="form-control">
+                    <input type="text" name="description" id="issue-description" class="form-control" disabled>
                 </div>
             </div>
 
@@ -55,8 +55,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="email" id="user-email" value="{{ request.user.email }}"
-                        class="form-control">
+                    <input type="text" name="email" id="user-email" class="form-control" disabled>
                 </div>
             </div>
 
@@ -68,7 +67,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reportdatepicker" class="form-control">
+                    <input type="text" id="reportdatepicker" class="form-control" disabled>
                 </div>
             </div>
 
@@ -80,7 +79,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reporttimepicker" class="form-control">
+                    <input type="text" id="reporttimepicker" class="form-control" disabled>
                 </div>
             </div>
 
@@ -92,7 +91,9 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="file" name="attachment" id="issue-attachment" class="form-control">
+                    <!-- <input type="file" name="attachment" id="issue-attachment" class="form-control" disabled> -->
+                    {% load static %}
+                    <img src="{% static 'assets/img/issue_image.png' %}" alt="issue_image">
                 </div>
             </div>
 
@@ -104,13 +105,15 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12 ">
-                    <textarea name="root_cause" id="root-cause" class="form-control"
-                        placeholder="Root cause"></textarea>
+                    <textarea name="root_cause" id="root-cause" class="form-control" placeholder="Root cause"
+                        disabled></textarea>
                 </div>
-            </div>
 
-            <div class="sub-btn mt-5">
-                <button type="submit" class="btn btn-primary issue-sub-btn">Submit</button>
+                <!-- Add comment Field -->
+                <div class="col-md-9 col-sm-12 ">
+                    <textarea name="Add_comment" id="Add_comment" class="form-control"
+                        placeholder="Add_comment"></textarea>
+                </div>
             </div>
         </form>
     </div>
@@ -120,17 +123,4 @@
     <h4 class="text-center">You do not have permission to view this page.</h4>
 </div>
 {% endif %}
-
-{% if form.errors %}
-<div class="alert alert-danger">
-    <ul>
-        {% for field, errors in form.errors.items %}
-        {% for error in errors %}
-        <li>{{ error }}</li>
-        {% endfor %}
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
-
 {% endblock %}

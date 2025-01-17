@@ -8,8 +8,8 @@ class IncidentIssue(models.Model):
     email = models.EmailField()
     report_date = models.DateField()
     report_time = models.TimeField()
-    attachment = models.FileField(upload_to='attachments/', null=True, blank=True)
-    root_cause = models.TextField()
+    attachment = models.FileField(upload_to='media/', null=True, blank=True)
+    root_cause = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.issue
