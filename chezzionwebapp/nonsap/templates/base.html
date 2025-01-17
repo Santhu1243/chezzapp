@@ -94,7 +94,6 @@
             // Get the current date and time
             var currentDate = new Date();
             var currentTime = currentDate.getHours() + ':' + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes();
-
             // Set the current date and time in the input fields
             $('#datepicker').val(currentDate.toLocaleDateString()); // e.g. '1/14/2025'
             $('#timepicker').val(currentTime); // e.g. '15:30'

@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 from .forms import IncidentIssueForm
+from django.contrib import messages
 
 # Home view
 @login_required
@@ -87,51 +88,71 @@ def superadmin_dashboard(request):
     return render(request, 'master/superadmin_dashboard.html', {})
 
 # Incident Issue form handling view
-# Incident Issue form handling view
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from .forms import IncidentIssueForm
+from .models import IncidentIssue
+from django.contrib.auth.models import User
+
 @login_required
 def raise_issue(request):
     if request.method == 'POST':
         form = IncidentIssueForm(request.POST, request.FILES)
         if form.is_valid():
-            issue = form.save(commit=False)
-            issue.reporter = request.user  # Automatically set the reporter as the logged-in user
-            issue.save()
+            # Create the issue object, but don't save it yet
+            incident_issue = form.save(commit=False)
+            incident_issue.reporter = request.user  # Automatically set the reporter as the logged-in user
+            incident_issue.save()  # Save the issue object
 
-            # Send email to the logged-in user
+            # Send confirmation email to the user who raised the issue
             try:
                 send_mail(
                     'Issue Reported Successfully',
-                    f'Your issue "{issue.issue}" has been successfully reported.',
+                    f'Your issue "{incident_issue.issue}" has been successfully reported.',
                     settings.DEFAULT_FROM_EMAIL,
                     [request.user.email],
                     fail_silently=False,
                 )
             except Exception as e:
+                # Log the error to the console for debugging
                 print(f"Error sending email to reporter: {e}")
 
-            # Send email to superadmins
+            # Send notification emails to all superadmins
             superadmins = User.objects.filter(is_superuser=True)
             for admin in superadmins:
                 try:
                     send_mail(
                         'New Issue Reported',
-                        f'A new issue "{issue.issue}" has been reported by {issue.reporter.username}.',
+                        f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}.',
                         settings.DEFAULT_FROM_EMAIL,
                         [admin.email],
                         fail_silently=False,
                     )
                 except Exception as e:
+                    # Log the error to the console for debugging
                     print(f"Error sending email to superadmin {admin.username}: {e}")
 
-            return redirect('success')  # Ensure 'success' URL exists in urls.py
+            # Use Django messages to give user feedback
+            messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
+
+            # Redirect after successful form submission
+            return redirect('nonsap:success', issue_id=incident_issue.id)  # Make sure you have this URL in your urls.py
+
+        else:
+            # If the form is not valid, return with error messages
+            messages.error(request, 'There was an error with your form submission. Please try again.')
     else:
-        form = IncidentIssueForm()
+        form = IncidentIssueForm()  # Get an empty form for GET requests
+
     return render(request, 'incident-management/raise-issue.html', {'form': form})
 
 
-@login_required
-def success(request):
-    return render(request, 'incident-management/success.html')
+
+def success(request, issue_id):
+    return render(request, 'incident-management/success.html', {'issue_id': issue_id})
 
 @login_required
 def viewassigned(request):

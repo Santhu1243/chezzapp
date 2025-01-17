@@ -12,7 +12,7 @@ urlpatterns = [
     path('incident-management/dashboard/', dashboard_view, name='dashboard'),
     path('staff-admin/admin-dashboard/', views.admin_dashboard, name='admin-dashboard'),  
     path('incident-management/raise-issue/', views.raise_issue, name='raise-issue'),
-    path('incident-management/success/', views.success, name='success'),
+    path('incident-management/success/<int:issue_id>/', views.success, name='success'),
     path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
     path('incident-management/status/', views.issuestatus, name='issuestatus'),
   
