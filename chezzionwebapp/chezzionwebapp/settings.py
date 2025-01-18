@@ -158,3 +158,9 @@ EMAIL_HOST_USER = 'youremail@example.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'yourpassword'  # Your email password
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default sender email address
+
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

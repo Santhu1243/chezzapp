@@ -1,0 +1,23 @@
+<!-- Comments Section -->
+<h3>Comments</h3>
+<ul>
+    {% for comment in comments %}
+    <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.text }} ({{ comment.created_at }})</li>
+    {% empty %}
+    <li>No comments yet. Be the first to comment!</li>
+    {% endfor %}
+</ul>
+
+<!-- Add Comment Form -->
+<h4>Add a Comment</h4>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+</form>
+</div>
+{% else %}
+<div class="alert alert-danger mt-5">
+    <h4 class="text-center">You do not have permission to view this page. Please log in.</h4>
+    <a href="{% url 'nonsap:login' %}" class="btn btn-primary">Login</a>
+</div>
