@@ -8,6 +8,14 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from .forms import IncidentIssueForm
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import IncidentIssue, Comment
+from .forms import CommentForm
+
+# nonsap/views.py
+
+from .models import Issue  # Ensure the name matches exactly
 
 # Home view
 @login_required
@@ -70,9 +78,7 @@ def get_redirect_url(user):
         return '/home/'  # Regular user home page
 
 # Dashboard view
-@login_required
-def dashboard_view(request):
-    return render(request, 'incident-management/dashboard.html', {'username': request.user.username})
+
 
 @login_required
 def admin_dashboard(request):
@@ -88,14 +94,7 @@ def superadmin_dashboard(request):
     return render(request, 'master/superadmin_dashboard.html', {})
 
 # Incident Issue form handling view
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from .forms import IncidentIssueForm
-from .models import IncidentIssue
-from django.contrib.auth.models import User
+
 
 @login_required
 def raise_issue(request):
@@ -158,6 +157,86 @@ def success(request, issue_id):
 def viewassigned(request):
     return render(request, 'admin/view-assigned.html')
 
+
+
+
+# @login_required
+# def user_issues(request):
+#     # Fetch the issues reported by the logged-in user
+#     issues = IncidentIssue.objects.filter(reporter=request.user)
+#     return render(request, 'incident-management/dashboard.html', {'issues': issues})
+
+
+
+
+
 @login_required
-def issuestatus(request):
-    return render(request, 'incident-management/issue-status.html')
+def dashboard_view(request):
+    # Fetch issues reported by the logged-in user
+    issues = IncidentIssue.objects.filter(reporter=request.user)
+    paginator = Paginator(issues, 5) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Count statistics
+    total_issues = issues.count()
+    active_issues = issues.filter(status='active').count()
+    resolved_issues = issues.filter(status='resolved').count()
+
+    # Render template
+    return render(
+        request,
+        'incident-management/dashboard.html',
+        {
+            'username': request.user.username,
+            'issues': page_obj,
+            'total_issues': total_issues,
+            'active_issues': active_issues,
+            'resolved_issues': resolved_issues,
+        }
+    )
+
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import IncidentIssue
+from .forms import CommentForm
+
+@login_required
+def view_status(request, issue_id):
+    # Fetch the issue object based on the issue_id
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    # Fetch the attachments related to the issue (assuming a related name "attachments")
+    attachments = issue.attachments.all()
+
+    # Handle the comment form submission
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.issue = issue
+            comment.commented_by = request.user
+            comment.save()
+    else:
+        form = CommentForm()
+
+    # Fetch the comments related to the issue (assuming a related name "comments")
+    comments = issue.comments.all()
+
+    return render(
+        request,
+        'incident-management/issue-status.html',
+        {
+            'issue': issue,
+            'attachments': attachments,
+            'form': form,
+            'comments': comments,
+        }
+    )
+
+
+
+    

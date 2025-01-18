@@ -2,6 +2,8 @@ from django import forms
 from .models import IncidentIssue
 from django.contrib.auth.models import User
 
+
+
 class IncidentIssueForm(forms.ModelForm):
     report_time = forms.TimeField(
         input_formats=['%I:%M %p'],  # Accepts 'hh:mm AM/PM'
@@ -32,3 +34,9 @@ class IncidentIssueForm(forms.ModelForm):
             instance.save()  # Save the model to the database
 
         return instance
+
+from django import forms
+
+class CommentForm(forms.Form):
+    comment = forms.CharField(widget=forms.Textarea, max_length=500)
+

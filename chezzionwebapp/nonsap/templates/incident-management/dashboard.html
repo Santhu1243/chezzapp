@@ -2,50 +2,16 @@
 {% block start %}
 <div class="container">
     {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-    <div class="container mt-5 mb-5 issuebox-grid">
-        <div class="box bg-warning">
-            <h4 class="text-center">Issue Raised</h4>
-            20
-        </div>
-        <div class="box bg-danger">
-            <h4 class="text-center">Active</h4>
-            20
-        </div>
-        <div class="box bg-success">
-            <h4 class="text-center">Resolved</h4>
-            20
-        </div>
-        <div class="box text-dark">
-            <a href="{% url 'nonsap:raise-issue' %}" class="text-decoration-none" target="_blank">
-                <h4 class="text-center">Raise Complaint</h4>
-                <i class="fa-solid fa-plus"></i>
-            </a>
-        </div>
-    </div>
+    {% include 'incident-management/partials/data-box.html' %}
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Sl. No</th>
-                <th scope="col">Issue title</th>
-                <th scope="col">Date and date</th>
-                <th scope="col">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Unable to save the data</td>
-                <td>20-10-2025</td>
-                <td><a class="btn btn-primary" href="view-status.html">View Status</a></td>
-            </tr>
+    {% include "incident-management/partials/user-issues.html" %}
 
-        </tbody>
-    </table>
     {% else %}
     <div class="alert alert-danger mt-5">
         <h4 class="text-center">You do not have permission to view this page.</h4>
     </div>
     {% endif %}
+    {% include 'incident-management/partials/pagination.html' %}
+
 </div>
 {% endblock %}

@@ -1,6 +1,8 @@
 from django.urls import path, include
 from .views import authView, home, dashboard_view, logout_view
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'nonsap'
 urlpatterns = [
@@ -14,7 +16,10 @@ urlpatterns = [
     path('incident-management/raise-issue/', views.raise_issue, name='raise-issue'),
     path('incident-management/success/<int:issue_id>/', views.success, name='success'),
     path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
-    path('incident-management/status/', views.issuestatus, name='issuestatus'),
-  
+    path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
+    # path('incident-management/issues/', views.user_issues, name='user_issues'),
+
 ]
 
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

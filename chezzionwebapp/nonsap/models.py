@@ -2,26 +2,75 @@ from django.db import models
 from django.contrib.auth.models import User
 from django import forms
 
+# Define STATUS_CHOICES before referencing it in the model
+STATUS_CHOICES = [
+    ('active', 'Active'),
+    ('resolved', 'Resolved'),
+]
+
 class IncidentIssue(models.Model):
     issue = models.CharField(max_length=255)
     description = models.TextField()
     reporter = models.ForeignKey(User, on_delete=models.CASCADE)
-    email = models.EmailField()  
+    email = models.EmailField()
     report_date = models.DateField()
     report_time = models.TimeField()  # Store time in the database
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)  # Optional field
     root_cause = models.TextField(default="No root cause provided")  # Add default
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='active',
+    )
 
     def __str__(self):
         return self.issue
 
+
 class IncidentIssueForm(forms.ModelForm):
     class Meta:
         model = IncidentIssue
-        fields = ['issue']  # Do not include 'reporter' here, it will be automatically set
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Set the 'reporter' field automatically when saving
-        if not self.instance.pk:  # If it's a new instance (not saved yet)
-            self.fields['reporter'].initial = None
+
+class Issue(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    reported_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+class Meta:
+        db_table = 'nonsap_incidentissue'
+
+
+
+
+class Comment(models.Model):
+    issue = models.ForeignKey(IncidentIssue, on_delete=models.CASCADE, related_name='comments')
+    comment_text = models.TextField()
+    commented_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    commented_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.commented_by} on {self.commented_at}"
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['comment_text']
+
+class IssueImage(models.Model):
+    issue = models.ForeignKey(IncidentIssue, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='issue_images/')
+    # other fields
+class Attachment(models.Model):
+    issue = models.ForeignKey(IncidentIssue, related_name='attachments', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='uploads/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
