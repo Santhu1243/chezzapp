@@ -36,6 +36,21 @@ class IncidentIssueForm(forms.ModelForm):
         return instance
 
 from django import forms
+from .models import Comment  # Replace with the actual model name
 
 class CommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea, max_length=500)
+
+    def save(self, incident, user, commit=True):
+        """
+        Save the form data to the database, associating it with an incident and user.
+        """
+        comment_instance = Comment(
+            comment=self.cleaned_data['comment'],
+            incident=incident,  # Associate the comment with an incident
+            user=user           # Associate the comment with the user
+        )
+        if commit:
+            comment_instance.save()
+        return comment_instance
+
