@@ -217,9 +217,12 @@ def view_status(request, issue_id):
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
-            comment = form.save(commit=False)
-            comment.issue = issue
-            comment.commented_by = request.user
+            # Create a new comment instance
+            comment = Comment(
+                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
+                issue=issue,  # Associate the comment with the issue
+                commented_by=request.user  # Associate the comment with the logged-in user
+            )
             comment.save()
     else:
         form = CommentForm()
@@ -256,6 +259,7 @@ def issue_details(request, issue_id):
 def super_admin_page(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = IncidentIssue.objects.all()  # Fetch all incident issues
+        
         return render(request, 'master/superadmin_dashboard.html', {'issues': issues})
     else:
         return render(request, 'master/superadmin_dashboard.html')
