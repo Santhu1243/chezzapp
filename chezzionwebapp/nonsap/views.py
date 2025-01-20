@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import IncidentIssue, Comment
 from .forms import CommentForm
+from .models import NonsapIncidentIssue
 
 # nonsap/views.py
 
@@ -237,6 +238,41 @@ def view_status(request, issue_id):
         }
     )
 
-
-
+def issue_details(request, issue_id):
+    issue = Issue.objects.get(id=issue_id)
+    attachments = Attachment.objects.filter(issue=issue)
+    comments = Comment.objects.filter(issue=issue)
+    form = CommentForm(request.POST or None)
     
+    return render(request, 'issue-status.html', {
+        'issue': issue,
+        'attachments': attachments,
+        'comments': comments,
+        'form': form
+    })
+
+
+
+def super_admin_page(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        issues = IncidentIssue.objects.all()  # Fetch all incident issues
+        return render(request, 'master/superadmin_dashboard.html', {'issues': issues})
+    else:
+        return render(request, 'master/superadmin_dashboard.html')
+from django.shortcuts import render
+from django.db.models import F
+
+def superadmin_dashboard(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        issues = (
+            IncidentIssue.objects.select_related('reporter')  # Assuming reporter is a ForeignKey
+            .annotate(reporter_name=F('reporter__username'))  # Add reporter name to the queryset
+            .all()
+        )
+        context = {
+            'user': request.user,
+            'issues': issues
+        }
+        return render(request, 'master/superadmin_dashboard.html', context)
+    else:
+        return render(request, 'master/access_denied.html')  # Optional: a dedicated denied access page

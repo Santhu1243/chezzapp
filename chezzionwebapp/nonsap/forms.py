@@ -14,7 +14,7 @@ class IncidentIssueForm(forms.ModelForm):
         model = IncidentIssue
         fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'root_cause']
 
-    def clean_reporter(self):
+    def clean_reporter(self):  # sourcery skip: raise-from-previous-error
         """ Custom validation for the reporter field. """
         reporter_username = self.cleaned_data.get('reporter')
         try:
@@ -39,4 +39,3 @@ from django import forms
 
 class CommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea, max_length=500)
-

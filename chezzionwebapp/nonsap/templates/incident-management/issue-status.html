@@ -21,60 +21,46 @@
                 <td>{{ issue.description }}</td>
             </tr>
             <tr>
-                <td><strong>Reporter</strong></td>
-                <td>{{ issue.reporter.username }}</td>
-            </tr>
-            <tr>
-                <td><strong>Email</strong></td>
-                <td>{{ issue.email }}</td>
-            </tr>
-            <tr>
-                <td><strong>Date Reported</strong></td>
+                <td><strong>Report Date</strong></td>
                 <td>{{ issue.report_date }}</td>
             </tr>
             <tr>
-                <td><strong>Time Reported</strong></td>
+                <td><strong>Report Time</strong></td>
                 <td>{{ issue.report_time }}</td>
-            </tr>
-
-            <!-- Display Attachments -->
-            <tr>
-                <td><strong>Attachments</strong></td>
-                <td>
-                    {% if issue.attachment %}
-                    <a href="{{ issue.attachment.url }}" target="_blank">{{ issue.attachment.name }}</a>
-                    {% else %}
-                    <p>No attachments provided.</p>
-                    {% endif %}
-                </td>
-            </tr>
-
-
-            <tr>
-                <td><strong>Root Cause</strong></td>
-                <td>{{ issue.root_cause }}</td>
-            </tr>
-            <tr>
-                <td><strong>Status</strong></td>
-                <td>
-                    {% if issue.status == 'open' %}
-                    <span class="badge bg-success">Open</span>
-                    {% elif issue.status == 'in_progress' %}
-                    <span class="badge bg-warning">In Progress</span>
-                    {% else %}
-                    <span class="badge bg-danger">Resolved</span>
-                    {% endif %}
-                </td>
             </tr>
         </tbody>
     </table>
-    <div class="text-center mt-4">
-        <a href="{% url 'nonsap:home' %}" class="btn btn-secondary">Back to Issues</a>
-    </div>
+
+    <h2 class="mt-5">Attachments</h2>
+    {% if attachments %}
+    <p>Attachments available:</p>
+    <ul>
+        {% for attachment in attachments %}
+        <li>{{ attachment.file.name }}</li>
+        {% endfor %}
+    </ul>
     {% else %}
-    <div class="alert alert-danger mt-5">
-        <h4 class="text-center">You do not have permission to view this page.</h4>
-    </div>
+    <p>No attachments available.</p>
+    {% endif %}
+
+
+    <h2 class="mt-5">Comments</h2>
+    <ul>
+        {% for comment in comments %}
+        <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.comment }}</li>
+        {% empty %}
+        <li>No comments yet.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Add Comment</button>
+    </form>
+
+    {% else %}
+    <p>Please log in to view issue details.</p>
     {% endif %}
 </div>
 {% endblock %}
