@@ -5,6 +5,9 @@
 <div class="container">
     Welcome <strong> {{ request.user.username }} </strong>
 </div>
+<div class="container">
+    {% include 'admin/partials/data-box.html' %}
+</div>
 {% else %}
 <div class="alert alert-danger mt-5">
     <h2 class="text-center"> You are not admin</h2>

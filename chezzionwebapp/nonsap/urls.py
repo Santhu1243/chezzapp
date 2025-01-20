@@ -17,7 +17,7 @@ urlpatterns = [
     path('incident-management/success/<int:issue_id>/', views.success, name='success'),
     path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
     path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
-    # path('incident-management/issues/', views.user_issues, name='user_issues'),
+    path('superuser/', views.super_admin_page, name='super_admin_page'),
 
 ]
 

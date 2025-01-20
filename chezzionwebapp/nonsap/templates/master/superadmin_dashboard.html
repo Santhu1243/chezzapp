@@ -2,8 +2,43 @@
 
 {% block start %}
 {% if user.is_authenticated and user.is_superuser %}
+
 <div class="container">
-    Hello super admin
+    <h4>Hello, <span class="text-bold">{{user.username}}</span></h4>
+    <div class="container">
+
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Created By</th>
+                <th>Issue Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Reported on</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <td>{{ issue.id }}</td>
+                <td>{{ issue.reporter_name }}</td>
+                <td>{{ issue.issue }}</td>
+                <td>{{ issue.description }}</td>
+                <td>{{ issue.status }}</td>
+                <td>{{ issue.report_date }}</td>
+                <td></td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No issues found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% else %}
 <div class="alert alert-danger mt-5">
