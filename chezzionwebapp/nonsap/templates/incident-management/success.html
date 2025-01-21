@@ -4,12 +4,13 @@
 {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
 <div class="container">
     <div class="col-md-8 col-sm-12 mx-auto text-center">
-        <h2 class=" mt-5">Your issue has been successfully reported!</h2>
-        <p>Our technical team will get in touch with you soon...!</p>
+        <h2 class=" mt-5">Your issue has been successfully reported! </h2>
+        <p>Our technical team will get in touch with you soon...! Please save this complaint id ({{ issue_id }}) for
+            future
+            reference.</p>
         <a class="btn btn-primary" href="{% url 'nonsap:home' %}">Go to home</a>
     </div>
 </div>
-
 {% else %}
 <div class="alert alert-danger mt-5">
     <h4 class="text-center">You do not have permission to view this page.</h4>

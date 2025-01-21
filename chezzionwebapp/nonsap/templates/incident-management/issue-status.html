@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block start %}
+<div class="container mt-5">
+    {% if user.is_authenticated %}
+    <h1 class="text-center">Issue Details</h1>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th scope="col">Field</th>
+                <th scope="col">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Issue Title</strong></td>
+                <td>{{ issue.issue }}</td>
+            </tr>
+            <tr>
+                <td><strong>Description</strong></td>
+                <td>{{ issue.description }}</td>
+            </tr>
+            <tr>
+                <td><strong>Report Date</strong></td>
+                <td>{{ issue.report_date }}</td>
+            </tr>
+            <tr>
+                <td><strong>Report Time</strong></td>
+                <td>{{ issue.report_time }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Attachments</h2>
+    {% if attachments %}
+    <p>Attachments available:</p>
+    <ul>
+        {% for attachment in attachments %}
+        <li>{{ attachment.file.name }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No attachments available.</p>
+    {% endif %}
+
+
+    <h2 class="mt-5">Comments</h2>
+    <ul>
+        {% for comment in comments %}
+        <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.comment }}</li>
+        {% empty %}
+        <li>No comments yet.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Add Comment</button>
+    </form>
+
+    {% else %}
+    <p>Please log in to view issue details.</p>
+    {% endif %}
+</div>
+{% endblock %}

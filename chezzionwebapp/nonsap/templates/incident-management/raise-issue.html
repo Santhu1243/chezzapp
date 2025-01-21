@@ -18,7 +18,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="issue" id="issue-title" class="form-control">
+                    <input type="text" name="issue" id="issue-title" class="form-control" required>
                 </div>
             </div>
 
@@ -30,7 +30,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="description" id="issue-description" class="form-control">
+                    <input type="text" name="description" id="issue-description" class="form-control" required>
                 </div>
             </div>
 
@@ -42,8 +42,10 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" name="username" id="username" value="{{ request.user.username }}"
-                        class="form-control" disabled>
+                    <input type="text" name="reporter_display" id="username" value="{{ request.user.username }}"
+                        readonly class="form-control">
+                    <input type="hidden" name="reporter" value="{{ request.user.username }}">
+
                 </div>
             </div>
 
@@ -68,7 +70,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reportdatepicker" class="form-control">
+                    <input type="text" id="reportdatepicker" name="report_date" class="form-control">
                 </div>
             </div>
 
@@ -80,7 +82,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reporttimepicker" class="form-control">
+                    <input type="text" id="reporttimepicker" name="report_time" class="form-control">
                 </div>
             </div>
 
@@ -92,8 +94,9 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="file" name="attachment" id="issue-attachment" class="form-control">
+                    <input type="file" name="attachment" id="issue-attachment" class="form-control" multiple>
                 </div>
+
             </div>
 
             <!-- Root Cause Field -->
@@ -104,13 +107,13 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12 ">
-                    <textarea name="root_cause" id="root-cause" class="form-control"
+                    <textarea name="root_cause" id="root-cause" class="form-control" required
                         placeholder="Root cause"></textarea>
                 </div>
             </div>
 
             <div class="sub-btn mt-5">
-                <button type="submit" class="btn btn-primary issue-sub-btn">Submit</button>
+                <button type="submit" class="btn btn-primary issue-sub-btn" id="submit-btn" disabled>Submit</button>
             </div>
         </form>
     </div>
@@ -120,4 +123,38 @@
     <h4 class="text-center">You do not have permission to view this page.</h4>
 </div>
 {% endif %}
+
+
+{% if form.errors %}
+<div class="alert alert-danger">
+    <ul>
+        {% for field_name, errors in form.errors.items %}
+        {% for error in errors %}
+        <li><strong>{{ field_name }}</strong>: {{ error }}</li>
+        {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('raise-issue');
+        const submitBtn = document.getElementById('submit-btn');
+        const requiredFields = ['issue-title', 'issue-description', 'username', 'user-email', 'reportdatepicker', 'reporttimepicker'];
+
+        function validateForm() {
+            let isValid = true;
+            requiredFields.forEach(function (fieldId) {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    isValid = false;
+                }
+            });
+            submitBtn.disabled = !isValid;
+        }
+
+        form.addEventListener('input', validateForm);
+        validateForm(); // Initial validation check
+    });
+</script>
 {% endblock %}

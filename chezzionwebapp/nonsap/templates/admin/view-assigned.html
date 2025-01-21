@@ -1,0 +1,13 @@
+{% extends "admin-base.html" %}
+
+{% block start %}
+{% if user.is_authenticated and user.is_staff %}
+<div class="container">
+    Assigned complaints
+</div>
+{% else %}
+<div class="alert alert-danger mt-5">
+    <h2 class="text-center"> You don't have any assigned complaints</h2>
+</div>
+{% endif %}
+{% endblock %}

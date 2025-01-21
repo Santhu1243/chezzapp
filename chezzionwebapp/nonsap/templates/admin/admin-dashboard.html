@@ -3,7 +3,10 @@
 {% block start %}
 {% if user.is_authenticated and user.is_staff %}
 <div class="container">
-    This is the admin dashboard for staff.
+    Welcome <strong> {{ request.user.username }} </strong>
+</div>
+<div class="container">
+    {% include 'admin/partials/data-box.html' %}
 </div>
 {% else %}
 <div class="alert alert-danger mt-5">
