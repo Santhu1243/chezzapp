@@ -29,7 +29,7 @@
                 <td>{{ issue.description }}</td>
                 <td>{{ issue.status }}</td>
                 <td>{{ issue.report_date }}</td>
-                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+                <td><a class="btn btn-primary" href="{% url 'nonsap:view_issue' issue.id %}">View Status</a></td>
             </tr>
 
             {% empty %}
