@@ -3,14 +3,52 @@
 {% block start %}
 {% if user.is_authenticated and user.is_staff %}
 <div class="container">
-    Welcome <strong> {{ request.user.username }} </strong>
-</div>
-<div class="container">
-    {% include 'admin/partials/data-box.html' %}
-</div>
+    <h4>Assigned Complaints</h4>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Issue Title</th>
+                    <th>Status</th>
+                    <th>Reported By</th>
+                    <th>Assigned On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in assigned_issues %}
+                <tr>
+                    <td>{{ issue.id }}</td>
+                    <td>{{ issue.issue }}</td>
+                    <td>{{ issue.status }}</td>
+                    <td>{{ issue.reporter.username }}</td>
+                    <td>{{ issue.assigned_date }}</td> <!-- Assuming assigned_date is a field -->
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No complaints assigned to you.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div><!-- admin/admin-dashboard.html -->
+<h1>Assigned Complaints</h1>
+{% if assigned_issues %}
+<ul>
+    {% for issue in assigned_issues %}
+    <li>{{ issue.issue }}</li> <!-- You can display more details here -->
+    {% endfor %}
+</ul>
+{% else %}
+<p>No complaints assigned.</p>
+{% endif %}
+
 {% else %}
 <div class="alert alert-danger mt-5">
-    <h2 class="text-center"> You are not admin</h2>
+    <h2 class="text-center">You don't have any assigned complaints</h2>
 </div>
 {% endif %}
 {% endblock %}
+
+print(assigned_issues) # Check if this returns the correct set of issues

@@ -5,6 +5,7 @@ from django import forms
 # Define STATUS_CHOICES before referencing it in the model
 STATUS_CHOICES = [
     ('active', 'Active'),
+    ('inprogress', 'inprogress'),
     ('resolved', 'Resolved'),
 ]
 
@@ -14,7 +15,8 @@ class IncidentIssue(models.Model):
     reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.EmailField()
     report_date = models.DateField()
-    report_time = models.TimeField()  # Store time in the database
+    report_time = models.TimeField() 
+    assigned_to = models.ForeignKey(User, null=True, blank=True, related_name="assigned_issues", on_delete=models.SET_NULL) # Store time in the database
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)  # Optional field
     root_cause = models.TextField(default="No root cause provided")  # Add default
     status = models.CharField(
@@ -37,6 +39,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     reported_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

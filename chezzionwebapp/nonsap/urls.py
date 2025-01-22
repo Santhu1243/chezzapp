@@ -18,6 +18,8 @@ urlpatterns = [
     path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
     path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
     path('superuser/', views.super_admin_page, name='super_admin_page'),
+    path('superuser/', views.assign_issue, name='assign_issue'),
+    path('assign-staff/<int:issue_id>/', views.assign_staff, name='assign_staff'),
 
 ]
 

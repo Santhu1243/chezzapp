@@ -273,10 +273,101 @@ def superadmin_dashboard(request):
             .annotate(reporter_name=F('reporter__username'))  # Add reporter name to the queryset
             .all()
         )
+        # Exclude the superuser from the staff list
+        staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
+        
         context = {
             'user': request.user,
-            'issues': issues
+            'issues': issues,
+            'staff_members': staff_members,
         }
         return render(request, 'master/superadmin_dashboard.html', context)
     else:
-        return render(request, 'master/access_denied.html')  # Optional: a dedicated denied access page
+        return render(request, 'master/access_denied.html')
+  # Optional: a dedicated denied access page
+
+
+def issue_list(request):
+    # Get all issues
+    issues = Issue.objects.all()
+
+    # Get all staff users
+    staff_users = User.objects.filter(is_staff=True)
+
+    # Create a list of dictionaries to hold each issue with its assigned_to_id
+    issues_with_assigned_to = []
+    for issue in issues:
+        assigned_to_id = issue.assigned_to.id if issue.assigned_to else None
+        issues_with_assigned_to.append({
+            'issue': issue,
+            'assigned_to_id': assigned_to_id
+        })
+
+    return render(request, 'master/superadmin_dashboard.html', {
+        'issues': issues_with_assigned_to,
+        'staff_users': staff_users,
+    })
+
+
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Issue, User  # Adjust model imports as per your project
+
+@login_required
+def assign_issue(request, issue_id):
+    if request.method == "POST":
+        staff_id = request.POST.get("staff_id")
+        issue = get_object_or_404(Issue, id=issue_id)
+        staff_member = get_object_or_404(User, id=staff_id, is_staff=True)
+
+        # Assign the issue to the selected staff member
+        issue.assigned_to = staff_member
+        issue.save()
+
+        # Redirect back to the issue list or display a success message
+        return redirect('master/superadmin_dashboard.html')  # Replace with your issue list URL
+
+
+@login_required
+def staff_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('home')  # Redirect non-staff users
+
+    # Fetch issues assigned to the logged-in staff member
+    assigned_issues = Issue.objects.filter(assigned_to=request.user)
+
+    return render(request, 'admin/admin-dashboard.html', {'assigned_issues': assigned_issues})
+
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import IncidentIssue
+from django.contrib.auth.models import User
+
+def assign_staff(request, issue_id):
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    if request.method == 'POST':
+        if staff_id := request.POST.get('staff_id'):
+            staff_member = get_object_or_404(User, id=staff_id)
+            # Assign the staff member to the issue
+            issue.assigned_to = staff_member
+            issue.save()
+
+            # Optionally, you can redirect to a success page or back to the issue list
+            return redirect('nonsap:view_status', issue_id=issue.id)
+
+    # If not a POST request, just render the page (GET)
+    return redirect('nonsap:superadmin_dashboard')  # Or any other fallback page
+
+
+
+
+def assigned_complaints(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        assigned_issues = IncidentIssue.objects.filter(assigned_to=request.user)
+        context = {
+            'assigned_issues': assigned_issues
+        }
+        return render(request, 'admin/admin-dashboard.html', context)
+    else:
+        return render(request, 'access-denied.html')
