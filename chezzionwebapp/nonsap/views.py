@@ -13,7 +13,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import IncidentIssue, Comment
 from .forms import CommentForm
 from .models import NonsapIncidentIssue
-
+from django.db.models import Q
 # nonsap/views.py
 
 from .models import Issue  # Ensure the name matches exactly
@@ -181,7 +181,8 @@ def dashboard_view(request):
 
     # Count statistics
     total_issues = issues.count()
-    active_issues = issues.filter(status='active').count()
+    active_issues = issues.filter(Q(status='active') | Q(status='inprogress')).count()
+    # active_issues = issues.filter(status='active').count()
     resolved_issues = issues.filter(status='resolved').count()
 
     # Render template
