@@ -14,8 +14,8 @@ from .models import IncidentIssue, Comment
 from .forms import CommentForm
 from .models import NonsapIncidentIssue
 from django.db.models import Q
-# nonsap/views.py
-
+from django.contrib.auth.decorators import login_required
+from .models import Issue, User  # Adjust model imports as per your project
 from .models import Issue  # Ensure the name matches exactly
 
 # Home view
@@ -201,10 +201,6 @@ def dashboard_view(request):
 
 
 
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import IncidentIssue
-from .forms import CommentForm
 
 @login_required
 def view_status(request, issue_id):
@@ -310,10 +306,6 @@ def issue_list(request):
     })
 
 
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Issue, User  # Adjust model imports as per your project
-
 @login_required
 def assign_issue(request, issue_id):
     if request.method == "POST":
@@ -329,20 +321,18 @@ def assign_issue(request, issue_id):
         return redirect('master/superadmin_dashboard.html')  # Replace with your issue list URL
 
 
-@login_required
-def staff_dashboard(request):
-    if not request.user.is_staff:
-        return redirect('home')  # Redirect non-staff users
+# @login_required
+# def staff_dashboard(request):
+#     if not request.user.is_staff:
+#         return redirect('home')  # Redirect non-staff users
 
-    # Fetch issues assigned to the logged-in staff member
-    assigned_issues = Issue.objects.filter(assigned_to=request.user)
+#     # Fetch issues assigned to the logged-in staff member
+#     assigned_issues = Issue.objects.filter(assigned_to=request.user)
 
-    return render(request, 'admin/admin-dashboard.html', {'assigned_issues': assigned_issues})
+#     return render(request, 'admin/admin-dashboard.html', {'assigned_issues': assigned_issues})
 
 
-from django.shortcuts import get_object_or_404, redirect
-from .models import IncidentIssue
-from django.contrib.auth.models import User
+
 
 def assign_staff(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
@@ -363,12 +353,32 @@ def assign_staff(request, issue_id):
 
 
 
+
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+
 def assigned_complaints(request):
+    # Check if the user is authenticated and is a staff member
     if request.user.is_authenticated and request.user.is_staff:
-        assigned_issues = IncidentIssue.objects.filter(assigned_to=request.user)
-        context = {
-            'assigned_issues': assigned_issues
-        }
-        return render(request, 'admin/admin-dashboard.html', context)
-    else:
-        return render(request, 'access-denied.html')
+        # Fetch issues assigned to the logged-in staff member
+        assigned_issues = IncidentIssue.objects.filter(assigned_to_id=request.user.id)
+        
+        # Debugging: Print the assigned issues for confirmation
+        print("Assigned Issues:", assigned_issues)
+        
+        # Paginate the issues: Show 10 issues per page
+        paginator = Paginator(assigned_issues, 10)
+        page = request.GET.get('page')  # Get the page number from the query parameters
+        issues_page = paginator.get_page(page)  # Get the paginated issues
+        
+        # Debugging: Print the paginated issues
+        print("Paginated Issues:", issues_page)
+        
+        # Pass the issues to the template
+        context = {'assigned_issues': issues_page}
+        return render(request, 'admin/view-assigned.html', context)
+    
+    # If user is not authenticated or not staff, redirect or show access denied
+    return render(request, 'access-denied.html')
+
+

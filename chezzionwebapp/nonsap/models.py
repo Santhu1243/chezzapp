@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django import forms
+from django.utils import timezone
 
 # Define STATUS_CHOICES before referencing it in the model
 STATUS_CHOICES = [
@@ -12,13 +13,17 @@ STATUS_CHOICES = [
 class IncidentIssue(models.Model):
     issue = models.CharField(max_length=255)
     description = models.TextField()
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reported_issues'
+    )
     email = models.EmailField()
     report_date = models.DateField()
-    report_time = models.TimeField() 
-    assigned_to = models.ForeignKey(User, null=True, blank=True, related_name="assigned_issues", on_delete=models.SET_NULL) # Store time in the database
-    attachment = models.FileField(upload_to='uploads/', null=True, blank=True)  # Optional field
-    root_cause = models.TextField(default="No root cause provided")  # Add default
+    report_time = models.TimeField()
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
+    root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
@@ -27,6 +32,7 @@ class IncidentIssue(models.Model):
 
     def __str__(self):
         return self.issue
+
 
 
 class IncidentIssueForm(forms.ModelForm):

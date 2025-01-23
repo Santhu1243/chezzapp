@@ -1,39 +1,41 @@
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">Sl. No</th>
-            <th scope="col">Title</th>
-            <!-- <th scope="col">Description</th> -->
-            <th scope="col">Date</th>
-            <th scope="col">Time</th>
-            <th scope="col">Status</th>
-            <th scope="col">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for issue in issues %}
-        <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ issue.issue }}</td>
-            <!-- <td>{{ issue.description }}</td> -->
-            <td>{{ issue.report_date }}</td>
-            <td>{{ issue.report_time }}</td>
-            <td>
-                {% if issue.status == 'active' %}
+<div class="table-responsive">
+    <table class="table table-striped ">
+        <thead>
+            <tr>
+                <th scope="col">Sl. No</th>
+                <th scope="col">Title</th>
+                <!-- <th scope="col">Description</th> -->
+                <th scope="col">Date</th>
+                <th scope="col">Time</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ issue.issue }}</td>
+                <!-- <td>{{ issue.description }}</td> -->
+                <td>{{ issue.report_date }}</td>
+                <td>{{ issue.report_time }}</td>
+                <td>
+                    {% if issue.status == 'active' %}
 
-                <button class="btn btn-danger">{{ issue.status }}</button>
+                    <button class="btn btn-danger">{{ issue.status }}</button>
 
-                {% elif issue.status == 'inprogress' %}
+                    {% elif issue.status == 'inprogress' %}
 
-                <button class="btn btn-warning">{{ issue.status }}</button>
-                {% else %}
-                <button class="btn btn-success">{{ issue.status }}</button>
+                    <button class="btn btn-secondary">{{ issue.status }}</button>
+                    {% else %}
+                    <button class="btn btn-success">{{ issue.status }}</button>
 
-                {% endif %}
+                    {% endif %}
 
-            </td>
-            <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                </td>
+                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

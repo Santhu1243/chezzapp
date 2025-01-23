@@ -1,41 +1,49 @@
 {% extends "admin-base.html" %}
 
 {% block start %}
-{% if user.is_authenticated and user.is_staff %}
+{% if user.is_staff %}
 <div class="container">
-    <h4>Assigned Complaints</h4>
+    <h4>Assigned Issues for <span class="text-bold">{{ user.username }}</span></h4>
+
+
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Created By</th>
                     <th>Issue Title</th>
                     <th>Status</th>
-                    <th>Reported By</th>
-                    <th>Assigned On</th>
+                    <th>Reported on</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for issue in assigned_issues %}
                 <tr>
                     <td>{{ issue.id }}</td>
+                    <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
                     <td>{{ issue.status }}</td>
-                    <td>{{ issue.reporter.username }}</td>
-                    <td>{{ issue.assigned_date }}</td> <!-- Assuming assigned_date is a field -->
+                    <td>{{ issue.report_date }}</td>
+                    <td>
+                        <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">No complaints assigned to you.</td>
+                    <td colspan="6" class="text-center">No assigned issues found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-{% else %}
-<div class="alert alert-danger mt-5">
-    <h2 class="text-center">You don't have any assigned complaints</h2>
-</div>
+
+
+
+
+
+
 {% endif %}
 {% endblock %}
