@@ -4,14 +4,6 @@
 {% if user.is_authenticated and user.is_superuser %}
 <div class="container">
     <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
-    <p>Staff Members:</p>
-    <ul>
-        {% for staff in staff_members %}
-        <li>{{ staff.username }} (ID: {{ staff.id }})</li>
-        {% empty %}
-        <li>No staff members found.</li>
-        {% endfor %}
-    </ul>
 
     <div class="table-responsive">
         <table class="table table-striped">
