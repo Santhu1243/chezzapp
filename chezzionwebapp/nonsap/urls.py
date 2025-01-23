@@ -15,9 +15,13 @@ urlpatterns = [
     path('staff-admin/admin-dashboard/', views.admin_dashboard, name='admin-dashboard'),  
     path('incident-management/raise-issue/', views.raise_issue, name='raise-issue'),
     path('incident-management/success/<int:issue_id>/', views.success, name='success'),
-    path('staff-admin/view-assigned/', views.viewassigned, name='viewassigned'),
+    path('staff-admin/view-assigned/', views.assigned_complaints, name='assigned_complaints'),
     path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
     path('superuser/', views.super_admin_page, name='super_admin_page'),
+    path('superuser/', views.assign_issue, name='assign_issue'),
+    path('assign-staff/<int:issue_id>/', views.assign_staff, name='assign_staff'),
+    path('view-assigned/', views.assigned_complaints, name='viewassigned'),
+
 
 ]
 
