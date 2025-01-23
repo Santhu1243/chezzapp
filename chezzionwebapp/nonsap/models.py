@@ -22,6 +22,7 @@ class IncidentIssue(models.Model):
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
     assigned_date = models.DateTimeField(auto_now_add=True)
+    assigned_staff = models.ForeignKey(User, related_name='assigned_issues', on_delete=models.SET_NULL, null=True, blank=True)
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -87,13 +88,4 @@ class Attachment(models.Model):
 from django.db import models
 from django.contrib.auth.models import User
 
-class NonsapIncidentIssue(models.Model):
-    issue = models.CharField(max_length=255)
-    description = models.TextField()
-    email = models.EmailField()
-    report_date = models.DateField()
-    report_time = models.TimeField()
-    attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
-    root_cause = models.TextField()
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the User table
-    status = models.CharField(max_length=50)
+

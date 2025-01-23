@@ -17,10 +17,10 @@ urlpatterns = [
     path('incident-management/success/<int:issue_id>/', views.success, name='success'),
     path('staff-admin/view-assigned/', views.assigned_complaints, name='assigned_complaints'),
     path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
-    path('superuser/', views.super_admin_page, name='super_admin_page'),
-    path('superuser/', views.assign_issue, name='assign_issue'),
+    path('superuser/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('assign-staff/<int:issue_id>/', views.assign_staff, name='assign_staff'),
     path('view-assigned/', views.assigned_complaints, name='viewassigned'),
+    path('staff-admin/viewdetails/<int:issue_id>/', views.view_details, name='view_details'),
 
 
 ]

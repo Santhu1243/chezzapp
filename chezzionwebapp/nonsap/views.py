@@ -12,11 +12,13 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import IncidentIssue, Comment
 from .forms import CommentForm
-from .models import NonsapIncidentIssue
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Issue, User  # Adjust model imports as per your project
 from .models import Issue  # Ensure the name matches exactly
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 # Home view
 @login_required
@@ -252,36 +254,26 @@ def issue_details(request, issue_id):
     })
 
 
-
-def super_admin_page(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        issues = IncidentIssue.objects.all()  # Fetch all incident issues
-        
-        return render(request, 'master/superadmin_dashboard.html', {'issues': issues})
-    else:
-        return render(request, 'master/superadmin_dashboard.html')
 from django.shortcuts import render
 from django.db.models import F
-
+from django.contrib.auth.models import User
+from .models import IncidentIssue 
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = (
-            IncidentIssue.objects.select_related('reporter')  # Assuming reporter is a ForeignKey
-            .annotate(reporter_name=F('reporter__username'))  # Add reporter name to the queryset
-            .all()
+            IncidentIssue.objects.select_related('reporter', 'assigned_staff')
+            .annotate(reporter_name=F('reporter__username'), assigned_staff_name=F('assigned_staff__username'))
         )
-        # Exclude the superuser from the staff list
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
         
         context = {
-            'user': request.user,
             'issues': issues,
             'staff_members': staff_members,
         }
+        
         return render(request, 'master/superadmin_dashboard.html', context)
-    else:
-        return render(request, 'master/access_denied.html')
-  # Optional: a dedicated denied access page
+    
+    return render(request, 'master/access_denied.html', status=403)
 
 
 def issue_list(request):
@@ -334,21 +326,20 @@ def assign_issue(request, issue_id):
 
 
 
+from django.shortcuts import get_object_or_404, redirect
+from .models import IncidentIssue, User
+
 def assign_staff(request, issue_id):
-    issue = get_object_or_404(IncidentIssue, id=issue_id)
-
+    issue = IncidentIssue.objects.get(id=issue_id)
     if request.method == 'POST':
-        if staff_id := request.POST.get('staff_id'):
-            staff_member = get_object_or_404(User, id=staff_id)
-            # Assign the staff member to the issue
-            issue.assigned_to = staff_member
-            issue.save()
+        staff_id = request.POST.get('staff_id')
+        staff = User.objects.get(id=staff_id)
+        issue.assigned_staff = staff
+        issue.save()
+        return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+    staff_members = User.objects.filter(is_staff=True)
+    return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})  # Redirect back to the dashboard
 
-            # Optionally, you can redirect to a success page or back to the issue list
-            return redirect('nonsap:view_status', issue_id=issue.id)
-
-    # If not a POST request, just render the page (GET)
-    return redirect('nonsap:superadmin_dashboard')  # Or any other fallback page
 
 
 
@@ -382,3 +373,38 @@ def assigned_complaints(request):
     return render(request, 'access-denied.html')
 
 
+@login_required
+def view_details(request, issue_id):
+    # Fetch the issue object based on the issue_id
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    # Fetch the attachments related to the issue (assuming a related name "attachments")
+    attachments = issue.attachments.all()
+
+    # Handle the comment form submission
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            # Create a new comment instance
+            comment = Comment(
+                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
+                issue=issue,  # Associate the comment with the issue
+                commented_by=request.user  # Associate the comment with the logged-in user
+            )
+            comment.save()
+    else:
+        form = CommentForm()
+
+    # Fetch the comments related to the issue (assuming a related name "comments")
+    comments = issue.comments.all()
+
+    return render(
+        request,
+        'incident-management/issue-status.html',
+        {
+            'issue': issue,
+            'attachments': attachments,
+            'form': form,
+            'comments': comments,
+        }
+    )

@@ -4,6 +4,15 @@
 {% if user.is_authenticated and user.is_superuser %}
 <div class="container">
     <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
+    <p>Staff Members:</p>
+    <ul>
+        {% for staff in staff_members %}
+        <li>{{ staff.username }} (ID: {{ staff.id }})</li>
+        {% empty %}
+        <li>No staff members found.</li>
+        {% endfor %}
+    </ul>
+
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
@@ -13,6 +22,7 @@
                     <th>Issue Title</th>
                     <th>Status</th>
                     <th>Reported on</th>
+                    <th>Assigned To</th> <!-- New column for assigned staff -->
                     <th>Action</th>
                     <th>Assign Staff</th>
                 </tr>
@@ -26,6 +36,13 @@
                     <td>{{ issue.status }}</td>
                     <td>{{ issue.report_date }}</td>
                     <td>
+                        {% if issue.assigned_staff %}
+                        {{ issue.assigned_staff.username }}
+                        {% else %}
+                        Not Assigned
+                        {% endif %}
+                    </td>
+                    <td>
                         <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
                     </td>
                     <td>
@@ -35,16 +52,18 @@
                                 <option value="" disabled selected>Assign to Staff</option>
                                 {% for staff in staff_members %}
                                 <option value="{{ staff.id }}">{{ staff.username }}</option>
+                                {% empty %}
+                                <option value="" disabled>No staff members available</option>
                                 {% endfor %}
-
                             </select>
+
                             <button type="submit" class="btn btn-success btn-sm mt-2">Assign</button>
                         </form>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No issues found.</td>
+                    <td colspan="8" class="text-center">No issues found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
