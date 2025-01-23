@@ -113,14 +113,15 @@ def raise_issue(request):
             try:
                 send_mail(
                     'Issue Reported Successfully',
-                    f'Your issue "{incident_issue.issue}" has been successfully reported.',
+                    f'<h3>Your issue "{incident_issue.issue}" has been successfully reported.</h3>',
                     settings.DEFAULT_FROM_EMAIL,
                     [request.user.email],
                     fail_silently=False,
+                    html_message=f'<h3>Your issue "{incident_issue.issue}" has been successfully reported.</h3>'
                 )
             except Exception as e:
-                # Log the error to the console for debugging
                 print(f"Error sending email to reporter: {e}")
+                messages.error(request, 'There was an error sending the confirmation email.')
 
             # Send notification emails to all superadmins
             superadmins = User.objects.filter(is_superuser=True)
@@ -134,14 +135,14 @@ def raise_issue(request):
                         fail_silently=False,
                     )
                 except Exception as e:
-                    # Log the error to the console for debugging
                     print(f"Error sending email to superadmin {admin.username}: {e}")
+                    messages.error(request, f'There was an error notifying the superadmin {admin.username}.')
 
             # Use Django messages to give user feedback
             messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
 
             # Redirect after successful form submission
-            return redirect('nonsap:success', issue_id=incident_issue.id)  # Make sure you have this URL in your urls.py
+            return redirect('nonsap:success', issue_id=incident_issue.id)
 
         else:
             # If the form is not valid, return with error messages
@@ -150,6 +151,7 @@ def raise_issue(request):
         form = IncidentIssueForm()  # Get an empty form for GET requests
 
     return render(request, 'incident-management/raise-issue.html', {'form': form})
+
 
 
 
@@ -265,10 +267,12 @@ def superadmin_dashboard(request):
             .annotate(reporter_name=F('reporter__username'), assigned_staff_name=F('assigned_staff__username'))
         )
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
-        
+        status_choices = Issue._meta.get_field('status').choices
+
         context = {
             'issues': issues,
             'staff_members': staff_members,
+            'status_choices': status_choices,
         }
         
         return render(request, 'master/superadmin_dashboard.html', context)
@@ -408,3 +412,74 @@ def view_details(request, issue_id):
             'comments': comments,
         }
     )
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseForbidden
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import IncidentIssue, STATUS_CHOICES
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404, render
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+from .models import IncidentIssue  # Assuming this is the model you're using
+
+
+@login_required
+def update_status(request, issue_id):
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You do not have permission to update this status.")
+
+    if request.method == "POST":
+        new_status = request.POST.get('status')
+
+        # Check if the status is valid
+        if new_status and new_status in dict(STATUS_CHOICES):
+            old_status = issue.status
+            issue.status = new_status
+            issue.save()
+
+            # Send email notifications for the status change
+            send_status_change_email(issue, old_status, new_status)
+
+            messages.success(request, f"Status for issue #{issue_id} updated to '{dict(STATUS_CHOICES)[new_status]}'.")
+        else:
+            messages.error(request, "Invalid status value.")
+
+    # Check where to redirect after updating the status
+    if 'from_dashboard' in request.GET:
+        template_name = 'master/superadmin_dashboard.html'
+    else:
+        template_name = 'admin/view-details.html'
+
+    context = {
+        'issue': issue,
+        'status_choices': STATUS_CHOICES,
+    }
+    return render(request, template_name, context)
+
+
+def send_status_change_email(issue, old_status, new_status):
+    # Send email to the user (reporter)
+    send_mail(
+        f'Issue #{issue.id} Status Changed',
+        f'Your issue "{issue.issue}" has been updated from "{old_status}" to "{new_status}".',
+        settings.DEFAULT_FROM_EMAIL,
+        [issue.reporter.email],
+        fail_silently=False,
+    )
+
+    # Send email to the assigned staff if the staff has been assigned
+    if issue.assigned_staff:
+        send_mail(
+            f'New Issue Assigned to You: #{issue.id}',
+            f'You have been assigned to the issue "{issue.issue}". The status is now "{new_status}".',
+            settings.DEFAULT_FROM_EMAIL,
+            [issue.assigned_staff.email],
+            fail_silently=False,
+        )

@@ -21,7 +21,7 @@ urlpatterns = [
     path('assign-staff/<int:issue_id>/', views.assign_staff, name='assign_staff'),
     path('view-assigned/', views.assigned_complaints, name='viewassigned'),
     path('staff-admin/viewdetails/<int:issue_id>/', views.view_details, name='view_details'),
-
+    path('update-status/<int:issue_id>/', views.update_status, name='update_status'),
 
 ]
 

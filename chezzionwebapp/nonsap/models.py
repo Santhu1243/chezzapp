@@ -46,7 +46,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     reported_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
