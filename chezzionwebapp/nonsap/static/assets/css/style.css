@@ -133,3 +133,10 @@ img.nav-logo {
 .nav-item {
     margin: 0px 15px;
 }
+
+p.card-text {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
