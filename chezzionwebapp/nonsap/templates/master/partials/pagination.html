@@ -1,0 +1,20 @@
+<div class="pagination">
+    <span class="step-links">
+        {% if issues.paginator.num_pages > 1 %}
+        {% if issues.has_previous %}
+        <a href="?page=1">&laquo; first</a>
+        <a href="?page={{ issues.previous_page_number }}">previous</a>
+        {% endif %}
+
+        {% if issues.has_next %}
+
+        <a class="nav-btns" href="?page={{ issues.paginator.num_pages }}">last</a>
+        <span class="current">
+            Page {{ issues.number }} of {{ issues.paginator.num_pages }}
+        </span>
+
+        <a class="nav-btns" href="?page={{ issues.next_page_number }}">Previous</a>
+        {% endif %}
+        {% endif %}
+    </span>
+</div>

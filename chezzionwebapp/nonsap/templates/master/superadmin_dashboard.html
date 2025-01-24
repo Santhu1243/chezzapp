@@ -5,7 +5,7 @@
 <div class="container">
     <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
 
-    <div class="table-responsive d-none d-md-block d-sm-none">
+    <div class="table-responsive d-none d-lg-block d-sm-none">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -26,16 +26,7 @@
                     <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
                     <td>
-                        <form method="POST" action="{% url 'nonsap:update_status' issue.id %}">
-                            {% csrf_token %}
-                            <select name="status" class="form-select" onchange="this.form.submit()">
-                                {% for key, value in status_choices %}
-                                <option value="{{ key }}" {% if issue.status == key %}selected{% endif %}>
-                                    {{ value }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </form>
+                        {% include 'master/partials/status_update_form.html' %}
                     </td>
                     <td>{{ issue.report_date }}</td>
                     <td>
@@ -49,24 +40,8 @@
                         <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
                     </td>
                     <td>
-                        <form method="POST" action="{% url 'nonsap:assign_staff' issue.id %}">
-                            {% csrf_token %}
-                            <div class="d-flex justify-content-evenly">
-                                <div class="select-staff">
-                                    <select name="staff_id" class="form-select" required>
-                                        <option value="" disabled selected>Assign to Staff</option>
-                                        {% for staff in staff_members %}
-                                        <option value="{{ staff.id }}">{{ staff.username }}</option>
-                                        {% empty %}
-                                        <option value="" disabled>No staff members available</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="staff-btn">
-                                    <button type="submit" class="btn btn-success">Assign</button>
-                                </div>
-                            </div>
-                        </form>
+                                     {% include 'master/partials/assign_staff_form.html' %}
+
                     </td>
                 </tr>
                 {% empty %}
@@ -76,13 +51,14 @@
                 {% endfor %}
             </tbody>
         </table>
+        <!-- Pagination -->
+        {% include 'master/partials/pagination.html' %}
     </div>
 
-    <!-- Pagination -->
-    {% include 'admin/partials/pagination.html' %}
+
 
     <!-- Mobile View -->
-    <div class="container d-md-none d-sm-block mt-5">
+    <div class="container d-lg-none d-sm-block mt-5">
         {% for issue in issues %}
         <div class="card mb-3">
             <div class="card-body">
@@ -90,16 +66,7 @@
                 <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
-                <form method="POST" action="{% url 'nonsap:update_status' issue.id %}">
-                    {% csrf_token %}
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        {% for key, value in status_choices %}
-                        <option value="{{ key }}" {% if issue.status == key %}selected{% endif %}>
-                            {{ value }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </form>
+               {% include 'master/partials/status_update_form.html' %}
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
                     {% if issue.assigned_staff %}
@@ -109,18 +76,7 @@
                     {% endif %}
                 </p>
                 <a class="btn btn-primary mb-2" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
-                <form method="POST" action="{% url 'nonsap:assign_staff' issue.id %}">
-                    {% csrf_token %}
-                    <select name="staff_id" class="form-select" required>
-                        <option value="" disabled selected>Assign to Staff</option>
-                        {% for staff in staff_members %}
-                        <option value="{{ staff.id }}">{{ staff.username }}</option>
-                        {% empty %}
-                        <option value="" disabled>No staff members available</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="btn btn-success mt-2">Assign</button>
-                </form>
+               {% include 'master/partials/assign_staff_form.html' %}
             </div>
         </div>
         {% empty %}

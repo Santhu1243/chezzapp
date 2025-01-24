@@ -1,0 +1,18 @@
+  <form method="POST" action="{% url 'nonsap:assign_staff' issue.id %}">
+                            {% csrf_token %}
+                            <div class="d-flex justify-content-evenly">
+                                <div class="select-staff">
+                                    <select name="staff_id" class="form-select" required>
+                                        <option value="" disabled selected>Assign to Staff</option>
+                                        {% for staff in staff_members %}
+                                        <option value="{{ staff.id }}">{{ staff.username }}</option>
+                                        {% empty %}
+                                        <option value="" disabled>No staff members available</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="staff-btn">
+                                    <button type="submit" class="btn btn-success">Assign</button>
+                                </div>
+                            </div>
+                        </form>

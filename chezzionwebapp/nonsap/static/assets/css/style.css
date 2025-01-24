@@ -156,3 +156,57 @@ ul.attachment-list {
     justify-content: center;
     margin-top: 20px;
 }
+
+
+/* comment box style */
+.comment-box {
+    background: #b5c2ce2b;
+    border-radius: 18px;
+    padding: 15px 21px;
+    border: 1px solid #b39a77;
+}
+
+ul.comments-list {
+    list-style: none;
+    margin-top: 30px;
+    border: 1px solid #f8982d;
+    border-radius: 15px;
+    padding-left: 0;
+}
+
+li.regular-user {
+    margin: 8px;
+    padding: 10px 8px;
+    width: fit-content;
+    border-bottom: 1px solid #e3dfdf;
+}
+
+.regular-badge {
+    padding: 5px 10px;
+    background: #f8982d;
+    border-radius: 50px;
+}
+
+span.comment-text {
+    padding: 0px 10px;
+}
+
+li.superuser,
+li.staff {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.superuser-badge {
+    padding: 5px 10px;
+    background: #004c93;
+    border-radius: 50px;
+    color: white;
+}
+
+li.superuser {
+    margin: 8px;
+    padding: 10px 8px;
+    color: black;
+    border-bottom: 1px solid #e3dfdf;
+}

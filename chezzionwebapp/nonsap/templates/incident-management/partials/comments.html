@@ -7,14 +7,17 @@
                 class="comment-item {% if comment.commented_by.is_superuser %}superuser{% elif comment.commented_by.is_staff %}staff{% else %}regular-user{% endif %}">
                 <strong class="comment-user">
                     {% if comment.commented_by.is_superuser %}
-                    <span class="user-badge superuser-badge"><i class="fa-solid fa-user-tie"></i></span>
+                    <span class="user-badge superuser-badge" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="{{ comment.commented_by }}">
+                        <i class="fa-solid fa-user-tie"></i></span>
                     {% elif comment.commented_by.is_staff %}
-                    <span class="user-badge staff-badge"><i class="fa-solid fa-user-tie"></i></span>
+                    <span class="user-badge staff-badge" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="{{ comment.commented_by }}"><i class="fa-solid fa-user-tie"></i></span>
                     {% else %}
-                    <span class="user-badge regular-badge"><i class="fa-solid fa-user"></i></span>
+                    <span class="user-badge regular-badge" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-title="{{ comment.commented_by }}"><i class="fa-solid fa-user"></i></span>
                     {% endif %}
-
-                    {{ comment.commented_by }}</strong>:
+                </strong>
                 <span class="comment-text">{{ comment.comment_text }}</span>
                 <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
 
@@ -34,3 +37,9 @@
         <button type="submit" class="btn btn-primary">Add Message</button>
     </form>
 </div>
+
+
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
