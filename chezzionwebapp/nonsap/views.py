@@ -18,8 +18,8 @@ from .models import Issue, User  # Adjust model imports as per your project
 from .models import Issue  # Ensure the name matches exactly
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-User = get_user_model()
-
+from django.utils.timezone import now
+from .models import Attachment
 # Home view
 @login_required
 def home(request):
@@ -99,31 +99,39 @@ def superadmin_dashboard(request):
 # Incident Issue form handling view
 
 
+
+
 @login_required
 def raise_issue(request):
     if request.method == 'POST':
         form = IncidentIssueForm(request.POST, request.FILES)
+        files = request.FILES.getlist('attachment')  # Get all uploaded files
         if form.is_valid():
-            # Create the issue object, but don't save it yet
+            # Create the issue object and save it
             incident_issue = form.save(commit=False)
-            incident_issue.reporter = request.user  # Automatically set the reporter as the logged-in user
-            incident_issue.save()  # Save the issue object
+            incident_issue.reporter = request.user
+            incident_issue.save()
 
-            # Send confirmation email to the user who raised the issue
+            # Save the attachments in the `nonsap_attachment` table
+            for file in files:
+                Attachment.objects.create(
+                    file=file.name,  # Store the file name
+                    issue_id=incident_issue.id,  # Link the attachment to the issue
+                    uploaded_at=now()
+                )
+
+            # Send email notifications (unchanged)
             try:
                 send_mail(
                     'Issue Reported Successfully',
-                    f'<h3>Your issue "{incident_issue.issue}" has been successfully reported.</h3>',
+                    f'Your issue "{incident_issue.issue}" has been successfully reported.',
                     settings.DEFAULT_FROM_EMAIL,
                     [request.user.email],
                     fail_silently=False,
-                    html_message=f'<h3>Your issue "{incident_issue.issue}" has been successfully reported.</h3>'
                 )
             except Exception as e:
                 print(f"Error sending email to reporter: {e}")
-                messages.error(request, 'There was an error sending the confirmation email.')
 
-            # Send notification emails to all superadmins
             superadmins = User.objects.filter(is_superuser=True)
             for admin in superadmins:
                 try:
@@ -136,22 +144,17 @@ def raise_issue(request):
                     )
                 except Exception as e:
                     print(f"Error sending email to superadmin {admin.username}: {e}")
-                    messages.error(request, f'There was an error notifying the superadmin {admin.username}.')
 
-            # Use Django messages to give user feedback
+            # Success message and redirect
             messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
-
-            # Redirect after successful form submission
             return redirect('nonsap:success', issue_id=incident_issue.id)
 
         else:
-            # If the form is not valid, return with error messages
             messages.error(request, 'There was an error with your form submission. Please try again.')
     else:
-        form = IncidentIssueForm()  # Get an empty form for GET requests
+        form = IncidentIssueForm()
 
     return render(request, 'incident-management/raise-issue.html', {'form': form})
-
 
 
 
@@ -206,6 +209,8 @@ def dashboard_view(request):
 
 
 
+from django.shortcuts import redirect
+
 @login_required
 def view_status(request, issue_id):
     # Fetch the issue object based on the issue_id
@@ -220,11 +225,14 @@ def view_status(request, issue_id):
         if form.is_valid():
             # Create a new comment instance
             comment = Comment(
-                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
-                issue=issue,  # Associate the comment with the issue
-                commented_by=request.user  # Associate the comment with the logged-in user
+                comment_text=form.cleaned_data['comment'],  # Use the correct field name
+                issue=issue,
+                commented_by=request.user
             )
             comment.save()
+
+            # Redirect to avoid re-submission on refresh
+            return redirect('nonsap:view_status', issue_id=issue.id)
     else:
         form = CommentForm()
 

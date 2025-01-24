@@ -39,7 +39,14 @@ from django import forms
 from .models import Comment  # Replace with the actual model name
 
 class CommentForm(forms.Form):
-    comment = forms.CharField(widget=forms.Textarea, max_length=500)
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',  # Bootstrap class for textarea styling
+            'placeholder': 'Write your comment here...',
+            'rows': 4,
+        }),
+        max_length=500
+    )
 
     def save(self, incident, user, commit=True):
         """
@@ -47,8 +54,8 @@ class CommentForm(forms.Form):
         """
         comment_instance = Comment(
             comment=self.cleaned_data['comment'],
-            incident=incident,  # Associate the comment with an incident
-            user=user           # Associate the comment with the user
+            incident=incident,  
+            user=user           
         )
         if commit:
             comment_instance.save()

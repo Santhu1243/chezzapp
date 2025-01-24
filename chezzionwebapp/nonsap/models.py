@@ -68,10 +68,11 @@ class Comment(models.Model):
         return f"Comment by {self.commented_by} on {self.commented_at}"
 
 
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['comment_text']
+from django import forms
+
+class CommentForm(forms.Form):
+    comment_text = forms.CharField(widget=forms.Textarea, required=True)
+
 
 class IssueImage(models.Model):
     issue = models.ForeignKey(IncidentIssue, related_name='images', on_delete=models.CASCADE)

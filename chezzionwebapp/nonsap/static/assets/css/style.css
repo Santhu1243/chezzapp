@@ -140,3 +140,19 @@ p.card-text {
     justify-content: space-between;
     align-items: center;
 }
+
+.attachment-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+}
+
+ul.attachment-list {
+    list-style: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
