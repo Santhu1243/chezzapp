@@ -1,0 +1,10 @@
+<form method="POST" action="{% url 'nonsap:update_status' issue.id %}">
+    {% csrf_token %}
+    <select name="status" class="form-select" onchange="this.form.submit()">
+        {% for key, value in status_choices %}
+        <option value="{{ key }}" {% if issue.status == key %}selected{% endif %}>
+            {{ value }}
+        </option>
+        {% endfor %}
+    </select>
+</form>
