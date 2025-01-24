@@ -1,23 +1,36 @@
-<!-- Comments Section -->
-<h3>Comments</h3>
-<ul>
-    {% for comment in comments %}
-    <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.text }} ({{ comment.created_at }})</li>
-    {% empty %}
-    <li>No comments yet. Be the first to comment!</li>
-    {% endfor %}
-</ul>
+<div class="col-md-6 col-sm-12 mx-auto comment-box">
+    <div class="comments-section">
+        <h3>Messages</h3>
+        <ul class="comments-list">
+            {% for comment in comments %}
+            <li
+                class="comment-item {% if comment.commented_by.is_superuser %}superuser{% elif comment.commented_by.is_staff %}staff{% else %}regular-user{% endif %}">
+                <strong class="comment-user">
+                    {% if comment.commented_by.is_superuser %}
+                    <span class="user-badge superuser-badge"><i class="fa-solid fa-user-tie"></i></span>
+                    {% elif comment.commented_by.is_staff %}
+                    <span class="user-badge staff-badge"><i class="fa-solid fa-user-tie"></i></span>
+                    {% else %}
+                    <span class="user-badge regular-badge"><i class="fa-solid fa-user"></i></span>
+                    {% endif %}
 
-<!-- Add Comment Form -->
-<h4>Add a Comment</h4>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
-</form>
-</div>
-{% else %}
-<div class="alert alert-danger mt-5">
-    <h4 class="text-center">You do not have permission to view this page. Please log in.</h4>
-    <a href="{% url 'nonsap:login' %}" class="btn btn-primary">Login</a>
+                    {{ comment.commented_by }}</strong>:
+                <span class="comment-text">{{ comment.comment_text }}</span>
+                <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+
+            </li>
+            {% empty %}
+            <li class="no-comments">No comments yet. Be the first to comment!</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">Add Message</button>
+    </form>
 </div>

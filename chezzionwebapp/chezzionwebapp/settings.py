@@ -156,11 +156,10 @@ EMAIL_PORT = 587  # SMTP port (use 465 for SSL, 587 for TLS)
 EMAIL_USE_TLS = True  # Use TLS (True/False)
 EMAIL_HOST_USER = 'youremail@example.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'yourpassword'  # Your email password
-
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default sender email address
 
 
 import os
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/uploads')

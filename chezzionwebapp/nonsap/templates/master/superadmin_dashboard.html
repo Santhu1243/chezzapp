@@ -4,15 +4,17 @@
 {% if user.is_authenticated and user.is_superuser %}
 <div class="container">
     <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
-    <div class="table-responsive">
+
+    <div class="table-responsive d-none d-md-block d-sm-none">
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Created By</th>
+                    <th>Username</th>
                     <th>Issue Title</th>
                     <th>Status</th>
                     <th>Reported on</th>
+                    <th>Assigned To</th>
                     <th>Action</th>
                     <th>Assign Staff</th>
                 </tr>
@@ -23,33 +25,110 @@
                     <td>{{ issue.id }}</td>
                     <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
-                    <td>{{ issue.status }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'nonsap:update_status' issue.id %}">
+                            {% csrf_token %}
+                            <select name="status" class="form-select" onchange="this.form.submit()">
+                                {% for key, value in status_choices %}
+                                <option value="{{ key }}" {% if issue.status == key %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </td>
                     <td>{{ issue.report_date }}</td>
+                    <td>
+                        {% if issue.assigned_staff %}
+                        {{ issue.assigned_staff.username }}
+                        {% else %}
+                        Not Assigned
+                        {% endif %}
+                    </td>
                     <td>
                         <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
                     </td>
                     <td>
                         <form method="POST" action="{% url 'nonsap:assign_staff' issue.id %}">
                             {% csrf_token %}
-                            <select name="staff_id" class="form-select" required>
-                                <option value="" disabled selected>Assign to Staff</option>
-                                {% for staff in staff_members %}
-                                <option value="{{ staff.id }}">{{ staff.username }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="submit" class="btn btn-success btn-sm mt-2">Assign</button>
+                            <div class="d-flex justify-content-evenly">
+                                <div class="select-staff">
+                                    <select name="staff_id" class="form-select" required>
+                                        <option value="" disabled selected>Assign to Staff</option>
+                                        {% for staff in staff_members %}
+                                        <option value="{{ staff.id }}">{{ staff.username }}</option>
+                                        {% empty %}
+                                        <option value="" disabled>No staff members available</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="staff-btn">
+                                    <button type="submit" class="btn btn-success">Assign</button>
+                                </div>
+                            </div>
                         </form>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No issues found.</td>
+                    <td colspan="8" class="text-center">No issues found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    {% include 'admin/partials/pagination.html' %}
+
+    <!-- Mobile View -->
+    <div class="container d-md-none d-sm-block mt-5">
+        {% for issue in issues %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Issue #{{ issue.id }}</h5>
+                <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
+                <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
+                <p class="card-text"><strong>Status:</strong></p>
+                <form method="POST" action="{% url 'nonsap:update_status' issue.id %}">
+                    {% csrf_token %}
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        {% for key, value in status_choices %}
+                        <option value="{{ key }}" {% if issue.status == key %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
+                <p class="card-text"><strong>Assigned To:</strong>
+                    {% if issue.assigned_staff %}
+                    {{ issue.assigned_staff.username }}
+                    {% else %}
+                    Not Assigned
+                    {% endif %}
+                </p>
+                <a class="btn btn-primary mb-2" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
+                <form method="POST" action="{% url 'nonsap:assign_staff' issue.id %}">
+                    {% csrf_token %}
+                    <select name="staff_id" class="form-select" required>
+                        <option value="" disabled selected>Assign to Staff</option>
+                        {% for staff in staff_members %}
+                        <option value="{{ staff.id }}">{{ staff.username }}</option>
+                        {% empty %}
+                        <option value="" disabled>No staff members available</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-success mt-2">Assign</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info text-center">No issues found.</div>
+        {% endfor %}
+    </div>
 </div>
+
 {% else %}
 <div class="alert alert-danger mt-5">
     <h4 class="text-center">You do not have permission to view this page.</h4>

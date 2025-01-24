@@ -28,36 +28,39 @@
                 <td><strong>Report Time</strong></td>
                 <td>{{ issue.report_time }}</td>
             </tr>
+            <tr>
+                <td><strong>Assigned to</strong></td>
+                <td>
+                    {% if issue.assigned_staff %}
+                    {{ issue.assigned_staff.username }}
+                    {% else %}
+                    Not Assigned
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Status</strong></td>
+                <td>
+                    {% if issue.status == 'active' %}
+
+                    <button class="btn btn-danger">{{ issue.status }}</button>
+
+                    {% elif issue.status == 'inprogress' %}
+
+                    <button class="btn btn-secondary">{{ issue.status }}</button>
+                    {% else %}
+                    <button class="btn btn-success">{{ issue.status }}</button>
+
+                    {% endif %}
+
+                </td>
+            </tr>
         </tbody>
     </table>
 
-    <h2 class="mt-5">Attachments</h2>
-    {% if attachments %}
-    <p>Attachments available:</p>
-    <ul>
-        {% for attachment in attachments %}
-        <li>{{ attachment.file.name }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No attachments available.</p>
-    {% endif %}
+    {% include 'incident-management/partials/attachments.html' %}
 
-
-    <h2 class="mt-5">Comments</h2>
-    <ul>
-        {% for comment in comments %}
-        <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.comment }}</li>
-        {% empty %}
-        <li>No comments yet.</li>
-        {% endfor %}
-    </ul>
-
-    <form method="post" class="mt-4">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Add Comment</button>
-    </form>
+    {% include 'incident-management/partials/comments.html' %}
 
     {% else %}
     <p>Please log in to view issue details.</p>

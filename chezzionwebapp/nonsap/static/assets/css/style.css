@@ -133,3 +133,26 @@ img.nav-logo {
 .nav-item {
     margin: 0px 15px;
 }
+
+p.card-text {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.attachment-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+}
+
+ul.attachment-list {
+    list-style: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}

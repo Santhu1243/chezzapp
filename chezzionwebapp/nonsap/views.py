@@ -12,12 +12,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import IncidentIssue, Comment
 from .forms import CommentForm
-from .models import NonsapIncidentIssue
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Issue, User  # Adjust model imports as per your project
 from .models import Issue  # Ensure the name matches exactly
-
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.utils.timezone import now
+from .models import Attachment
 # Home view
 @login_required
 def home(request):
@@ -97,17 +99,28 @@ def superadmin_dashboard(request):
 # Incident Issue form handling view
 
 
+
+
 @login_required
 def raise_issue(request):
     if request.method == 'POST':
         form = IncidentIssueForm(request.POST, request.FILES)
+        files = request.FILES.getlist('attachment')  # Get all uploaded files
         if form.is_valid():
-            # Create the issue object, but don't save it yet
+            # Create the issue object and save it
             incident_issue = form.save(commit=False)
-            incident_issue.reporter = request.user  # Automatically set the reporter as the logged-in user
-            incident_issue.save()  # Save the issue object
+            incident_issue.reporter = request.user
+            incident_issue.save()
 
-            # Send confirmation email to the user who raised the issue
+            # Save the attachments in the `nonsap_attachment` table
+            for file in files:
+                Attachment.objects.create(
+                    file=file.name,  # Store the file name
+                    issue_id=incident_issue.id,  # Link the attachment to the issue
+                    uploaded_at=now()
+                )
+
+            # Send email notifications (unchanged)
             try:
                 send_mail(
                     'Issue Reported Successfully',
@@ -117,10 +130,8 @@ def raise_issue(request):
                     fail_silently=False,
                 )
             except Exception as e:
-                # Log the error to the console for debugging
                 print(f"Error sending email to reporter: {e}")
 
-            # Send notification emails to all superadmins
             superadmins = User.objects.filter(is_superuser=True)
             for admin in superadmins:
                 try:
@@ -132,20 +143,16 @@ def raise_issue(request):
                         fail_silently=False,
                     )
                 except Exception as e:
-                    # Log the error to the console for debugging
                     print(f"Error sending email to superadmin {admin.username}: {e}")
 
-            # Use Django messages to give user feedback
+            # Success message and redirect
             messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
-
-            # Redirect after successful form submission
-            return redirect('nonsap:success', issue_id=incident_issue.id)  # Make sure you have this URL in your urls.py
+            return redirect('nonsap:success', issue_id=incident_issue.id)
 
         else:
-            # If the form is not valid, return with error messages
             messages.error(request, 'There was an error with your form submission. Please try again.')
     else:
-        form = IncidentIssueForm()  # Get an empty form for GET requests
+        form = IncidentIssueForm()
 
     return render(request, 'incident-management/raise-issue.html', {'form': form})
 
@@ -202,6 +209,8 @@ def dashboard_view(request):
 
 
 
+from django.shortcuts import redirect
+
 @login_required
 def view_status(request, issue_id):
     # Fetch the issue object based on the issue_id
@@ -216,11 +225,14 @@ def view_status(request, issue_id):
         if form.is_valid():
             # Create a new comment instance
             comment = Comment(
-                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
-                issue=issue,  # Associate the comment with the issue
-                commented_by=request.user  # Associate the comment with the logged-in user
+                comment_text=form.cleaned_data['comment'],  # Use the correct field name
+                issue=issue,
+                commented_by=request.user
             )
             comment.save()
+
+            # Redirect to avoid re-submission on refresh
+            return redirect('nonsap:view_status', issue_id=issue.id)
     else:
         form = CommentForm()
 
@@ -252,36 +264,28 @@ def issue_details(request, issue_id):
     })
 
 
-
-def super_admin_page(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        issues = IncidentIssue.objects.all()  # Fetch all incident issues
-        
-        return render(request, 'master/superadmin_dashboard.html', {'issues': issues})
-    else:
-        return render(request, 'master/superadmin_dashboard.html')
 from django.shortcuts import render
 from django.db.models import F
-
+from django.contrib.auth.models import User
+from .models import IncidentIssue 
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = (
-            IncidentIssue.objects.select_related('reporter')  # Assuming reporter is a ForeignKey
-            .annotate(reporter_name=F('reporter__username'))  # Add reporter name to the queryset
-            .all()
+            IncidentIssue.objects.select_related('reporter', 'assigned_staff')
+            .annotate(reporter_name=F('reporter__username'), assigned_staff_name=F('assigned_staff__username'))
         )
-        # Exclude the superuser from the staff list
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
-        
+        status_choices = Issue._meta.get_field('status').choices
+
         context = {
-            'user': request.user,
             'issues': issues,
             'staff_members': staff_members,
+            'status_choices': status_choices,
         }
+        
         return render(request, 'master/superadmin_dashboard.html', context)
-    else:
-        return render(request, 'master/access_denied.html')
-  # Optional: a dedicated denied access page
+    
+    return render(request, 'master/access_denied.html', status=403)
 
 
 def issue_list(request):
@@ -334,21 +338,20 @@ def assign_issue(request, issue_id):
 
 
 
+from django.shortcuts import get_object_or_404, redirect
+from .models import IncidentIssue, User
+
 def assign_staff(request, issue_id):
-    issue = get_object_or_404(IncidentIssue, id=issue_id)
-
+    issue = IncidentIssue.objects.get(id=issue_id)
     if request.method == 'POST':
-        if staff_id := request.POST.get('staff_id'):
-            staff_member = get_object_or_404(User, id=staff_id)
-            # Assign the staff member to the issue
-            issue.assigned_to = staff_member
-            issue.save()
+        staff_id = request.POST.get('staff_id')
+        staff = User.objects.get(id=staff_id)
+        issue.assigned_staff = staff
+        issue.save()
+        return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+    staff_members = User.objects.filter(is_staff=True)
+    return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})  # Redirect back to the dashboard
 
-            # Optionally, you can redirect to a success page or back to the issue list
-            return redirect('nonsap:view_status', issue_id=issue.id)
-
-    # If not a POST request, just render the page (GET)
-    return redirect('nonsap:superadmin_dashboard')  # Or any other fallback page
 
 
 
@@ -382,3 +385,109 @@ def assigned_complaints(request):
     return render(request, 'access-denied.html')
 
 
+@login_required
+def view_details(request, issue_id):
+    # Fetch the issue object based on the issue_id
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    # Fetch the attachments related to the issue (assuming a related name "attachments")
+    attachments = issue.attachments.all()
+
+    # Handle the comment form submission
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            # Create a new comment instance
+            comment = Comment(
+                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
+                issue=issue,  # Associate the comment with the issue
+                commented_by=request.user  # Associate the comment with the logged-in user
+            )
+            comment.save()
+    else:
+        form = CommentForm()
+
+    # Fetch the comments related to the issue (assuming a related name "comments")
+    comments = issue.comments.all()
+
+    return render(
+        request,
+        'incident-management/issue-status.html',
+        {
+            'issue': issue,
+            'attachments': attachments,
+            'form': form,
+            'comments': comments,
+        }
+    )
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseForbidden
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import IncidentIssue, STATUS_CHOICES
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404, render
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+from .models import IncidentIssue  # Assuming this is the model you're using
+
+
+@login_required
+def update_status(request, issue_id):
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You do not have permission to update this status.")
+
+    if request.method == "POST":
+        new_status = request.POST.get('status')
+
+        # Check if the status is valid
+        if new_status and new_status in dict(STATUS_CHOICES):
+            old_status = issue.status
+            issue.status = new_status
+            issue.save()
+
+            # Send email notifications for the status change
+            send_status_change_email(issue, old_status, new_status)
+
+            messages.success(request, f"Status for issue #{issue_id} updated to '{dict(STATUS_CHOICES)[new_status]}'.")
+        else:
+            messages.error(request, "Invalid status value.")
+
+    # Check where to redirect after updating the status
+    if 'from_dashboard' in request.GET:
+        template_name = 'master/superadmin_dashboard.html'
+    else:
+        template_name = 'admin/view-details.html'
+
+    context = {
+        'issue': issue,
+        'status_choices': STATUS_CHOICES,
+    }
+    return render(request, template_name, context)
+
+
+def send_status_change_email(issue, old_status, new_status):
+    # Send email to the user (reporter)
+    send_mail(
+        f'Issue #{issue.id} Status Changed',
+        f'Your issue "{issue.issue}" has been updated from "{old_status}" to "{new_status}".',
+        settings.DEFAULT_FROM_EMAIL,
+        [issue.reporter.email],
+        fail_silently=False,
+    )
+
+    # Send email to the assigned staff if the staff has been assigned
+    if issue.assigned_staff:
+        send_mail(
+            f'New Issue Assigned to You: #{issue.id}',
+            f'You have been assigned to the issue "{issue.issue}". The status is now "{new_status}".',
+            settings.DEFAULT_FROM_EMAIL,
+            [issue.assigned_staff.email],
+            fail_silently=False,
+        )

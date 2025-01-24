@@ -6,12 +6,12 @@
     <h4>Assigned Issues for <span class="text-bold">{{ user.username }}</span></h4>
 
 
-    <div class="table-responsive">
+    <div class="table-responsive d-md-block d-sm-none">
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Created By</th>
+                    <th>Username</th>
                     <th>Issue Title</th>
                     <th>Status</th>
                     <th>Reported on</th>
@@ -27,7 +27,7 @@
                     <td>{{ issue.status }}</td>
                     <td>{{ issue.report_date }}</td>
                     <td>
-                        <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
+                        <a class="btn btn-primary" href="{% url 'nonsap:view_details' issue.id %}">View Status</a>
                     </td>
                 </tr>
                 {% empty %}
@@ -39,11 +39,6 @@
         </table>
     </div>
 </div>
-
-
-
-
-
 
 {% endif %}
 {% endblock %}

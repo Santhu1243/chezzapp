@@ -113,7 +113,17 @@
             </div>
 
             <div class="sub-btn mt-5">
-                <button type="submit" class="btn btn-primary issue-sub-btn" id="submit-btn" disabled>Submit</button>
+                <button type="submit" class="btn btn-primary issue-sub-btn" id="submit-btn" disabled>Submit
+                    <div id="loading-icon" style="display: none; text-align: center; ">
+                        <div class="spinner-grow" role="status">
+                        </div>
+                        <div class="spinner-grow" role="status">
+                        </div>
+                        <div class="spinner-grow" role="status">
+                        </div>
+                    </div>
+                </button>
+
             </div>
         </form>
     </div>
@@ -136,10 +146,12 @@
     </ul>
 </div>
 {% endif %}
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('raise-issue');
         const submitBtn = document.getElementById('submit-btn');
+        const loadingIcon = document.getElementById('loading-icon');
         const requiredFields = ['issue-title', 'issue-description', 'username', 'user-email', 'reportdatepicker', 'reporttimepicker'];
 
         function validateForm() {
@@ -154,6 +166,11 @@
         }
 
         form.addEventListener('input', validateForm);
+        form.addEventListener('submit', function () {
+            // Show the loading icon when the form is submitted
+            loadingIcon.style.display = 'block';
+            submitBtn.disabled = true; // Prevent further submissions
+        });
         validateForm(); // Initial validation check
     });
 </script>

@@ -22,6 +22,7 @@ class IncidentIssue(models.Model):
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
     assigned_date = models.DateTimeField(auto_now_add=True)
+    assigned_staff = models.ForeignKey(User, related_name='assigned_issues', on_delete=models.SET_NULL, null=True, blank=True)
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -45,7 +46,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     reported_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,10 +68,11 @@ class Comment(models.Model):
         return f"Comment by {self.commented_by} on {self.commented_at}"
 
 
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['comment_text']
+from django import forms
+
+class CommentForm(forms.Form):
+    comment_text = forms.CharField(widget=forms.Textarea, required=True)
+
 
 class IssueImage(models.Model):
     issue = models.ForeignKey(IncidentIssue, related_name='images', on_delete=models.CASCADE)
@@ -87,13 +89,4 @@ class Attachment(models.Model):
 from django.db import models
 from django.contrib.auth.models import User
 
-class NonsapIncidentIssue(models.Model):
-    issue = models.CharField(max_length=255)
-    description = models.TextField()
-    email = models.EmailField()
-    report_date = models.DateField()
-    report_time = models.TimeField()
-    attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
-    root_cause = models.TextField()
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the User table
-    status = models.CharField(max_length=50)
+
