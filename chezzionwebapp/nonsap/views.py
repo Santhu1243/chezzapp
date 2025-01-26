@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from .models import Attachment
+from django.urls import path
 # Home view
 @login_required
 def home(request):
@@ -71,16 +72,19 @@ def login_view(request):
     
     return render(request, 'registration/login.html', {'form': form})
 
-# Helper function for determining redirection URL
+# Helper function for determining redirection URLimport logging
+
 def get_redirect_url(user):
     if user.is_superuser:
-        return '/superadmin/'  # Superadmin dashboard URL
+        logger.debug("Redirecting superuser to /superadmin/")
+        return '/superadmin/'
     elif user.is_staff:
-        return '/admin_dashboard/'  # Admin dashboard URL
+        logger.debug("Redirecting staff to /admin_dashboard/")
+        return '/admin_dashboard/'
     else:
-        return '/home/'  # Regular user home page
+        logger.debug("Redirecting user to /home/")
+        return '/home/'
 
-# Dashboard view
 
 
 @login_required

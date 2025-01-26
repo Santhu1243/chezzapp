@@ -210,3 +210,15 @@ li.superuser {
     color: black;
     border-bottom: 1px solid #e3dfdf;
 }
+
+li.no-comments {
+    padding: 10px;
+}
+
+.btn-primary {
+    background: #003986;
+}
+
+a {
+    color: #003986;
+}
