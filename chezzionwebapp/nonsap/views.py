@@ -167,7 +167,14 @@ def success(request, issue_id):
 
 @login_required
 def viewassigned(request):
-    return render(request, 'admin/view-assigned.html')
+    # Fetch the assigned issues for the logged-in user
+    assigned_issues = request.user.assigned_issues.all()
+
+    # Optionally, print to debug the query result
+    print(assigned_issues)  # Check if issues are being retrieved
+
+    return render(request, 'admin/view-assigned.html', {'assigned_issues': assigned_issues})
+
 
 
 
