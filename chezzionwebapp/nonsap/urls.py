@@ -1,8 +1,9 @@
 from django.urls import path, include
-from .views import authView, home, dashboard_view, logout_view
+from .views import authView, home, dashboard_view, logout_view, staff_login_view, superadmin_login_view
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+
 
 app_name = 'nonsap'
 urlpatterns = [
@@ -22,7 +23,8 @@ urlpatterns = [
     path('view-assigned/', views.assigned_complaints, name='viewassigned'),
     path('staff-admin/viewdetails/<int:issue_id>/', views.view_details, name='view_details'),
     path('update-status/<int:issue_id>/', views.update_status, name='update_status'),
-
+    path('superadmin-login/', views.superadmin_login_view, name='superadmin_login'),
+    path('staff-login/', views.staff_login_view, name='staff_login'),
 ]
 
 

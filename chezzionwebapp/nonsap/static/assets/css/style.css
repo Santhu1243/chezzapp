@@ -222,3 +222,10 @@ li.no-comments {
 a {
     color: #003986;
 }
+
+.staff-bg {
+    background: url(../img/Chezzion-resized.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}

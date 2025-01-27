@@ -16,7 +16,6 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Issue, User  # Adjust model imports as per your project
 from .models import Issue  # Ensure the name matches exactly
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from .models import Attachment
@@ -54,36 +53,67 @@ class LoginForm(forms.Form):
     username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-# Login view
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect(get_redirect_url(request.user))  # Redirect authenticated users
 
-    form = LoginForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect(get_redirect_url(user))
+def authenticate_user(request, username, password):
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        print(f"Authenticated user: {user.username}")  # Debugging
+        login(request, user)
+        return redirect(get_redirect_url(user))
+    return None
+
+
+# Login viewfrom django.contrib import messages
+
+
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            # Get the user credentials from the form
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            
+            # Authenticate the user
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                if user.is_staff or user.is_superuser:
+                    # Add an error message if the user is staff or superuser
+                    form.add_error(None, "Access denied. Only regular users are allowed.")
+                else:
+                    # Log the user in
+                    login(request, user)
+                    messages.success(request, f"Logged in as {user.username}")
+                    
+                    # Redirect to home page or another page
+                    return redirect('home')  # Replace 'home' with your desired URL name
+            else:
+                # If authentication fails, return an error
+                form.add_error(None, "Invalid username or password.")
         else:
-            form.add_error(None, "Invalid username or password")
-    
+            form.add_error(None, "Please fill in all fields.")
+    else:
+        form = LoginForm()
+
     return render(request, 'registration/login.html', {'form': form})
+
+
 
 # Helper function for determining redirection URLimport logging
 
+from django.urls import reverse
+
 def get_redirect_url(user):
     if user.is_superuser:
-        logger.debug("Redirecting superuser to /superadmin/")
-        return '/superadmin/'
+        return reverse('superadmin_dashboard')  # assuming you have a named URL
     elif user.is_staff:
-        logger.debug("Redirecting staff to /admin_dashboard/")
-        return '/admin_dashboard/'
+        return reverse('admin_dashboard')
     else:
-        logger.debug("Redirecting user to /home/")
-        return '/home/'
+        return reverse('home')
+
 
 
 
@@ -119,7 +149,7 @@ def raise_issue(request):
             # Save the attachments in the `nonsap_attachment` table
             for file in files:
                 Attachment.objects.create(
-                    file=file.name,  # Store the file name
+                    file=file,  # Store the file name
                     issue_id=incident_issue.id,  # Link the attachment to the issue
                     uploaded_at=now()
                 )
@@ -277,7 +307,6 @@ def issue_details(request, issue_id):
 
 from django.shortcuts import render
 from django.db.models import F
-from django.contrib.auth.models import User
 from .models import IncidentIssue 
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
@@ -502,3 +531,52 @@ def send_status_change_email(issue, old_status, new_status):
             [issue.assigned_staff.email],
             fail_silently=False,
         )
+
+
+
+# login pages 
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from .forms import StaffLoginForm, SuperAdminLoginForm
+from django.contrib import messages
+
+# Staff login view
+def staff_login_view(request):
+    if request.method == 'POST':
+        form = StaffLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and user.is_staff:
+                login(request, user)
+                messages.success(request, f"Logged in as staff: {user.username}")
+                return redirect('nonsap:admin-dashboard')  # Redirect to staff dashboard
+            else:
+                messages.error(request, "Invalid username or password, or not authorized.")
+    else:
+        form = StaffLoginForm()
+
+    return render(request, 'registration/staff_login.html', {'form': form})
+
+# SuperAdmin login view
+def superadmin_login_view(request):
+    if request.method == 'POST':
+        form = SuperAdminLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and user.is_superuser:
+                login(request, user)
+                messages.success(request, f"Logged in as superadmin: {user.username}")
+                return redirect('nonsap:superadmin_dashboard')  # Redirect to superadmin dashboard
+            else:
+                messages.error(request, "Invalid username or password, or not authorized.")
+    else:
+        form = SuperAdminLoginForm()
+
+    return render(request, 'registration/superadmin_login.html', {'form': form})
