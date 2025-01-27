@@ -145,8 +145,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default backend for se
 # settings.py
 
 LOGOUT_REDIRECT_URL = 'nonsap:login'
-LOGOUT_REDIRECT_URL = 'nonsap:dashboard'
-
+LOGIN_REDIRECT_URL = '/'
 
 
 # Email settings for sending emails
@@ -165,3 +164,5 @@ import os
 
 MEDIA_URL = '/media/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/uploads')
+
+

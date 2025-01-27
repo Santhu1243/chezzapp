@@ -61,3 +61,12 @@ class CommentForm(forms.Form):
             comment_instance.save()
         return comment_instance
 
+# Staff Login Form
+class StaffLoginForm(forms.Form):
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+# SuperAdmin Login Form
+class SuperAdminLoginForm(forms.Form):
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
