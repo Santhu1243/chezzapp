@@ -79,20 +79,19 @@ def login_view(request):
             # Authenticate the user
             user = authenticate(request, username=username, password=password)
             
-            if user is not None:
-                if user.is_staff or user.is_superuser:
-                    # Add an error message if the user is staff or superuser
-                    form.add_error(None, "Access denied. Only regular users are allowed.")
-                else:
-                    # Log the user in
-                    login(request, user)
-                    messages.success(request, f"Logged in as {user.username}")
-                    
-                    # Redirect to home page or another page
-                    return redirect('home')  # Replace 'home' with your desired URL name
-            else:
+            if user is None:
                 # If authentication fails, return an error
                 form.add_error(None, "Invalid username or password.")
+            elif user.is_staff or user.is_superuser:
+                # Add an error message if the user is staff or superuser
+                form.add_error(None, "Access denied. Only regular users are allowed.")
+            else:
+                # Log the user in
+                login(request, user)
+                messages.success(request, f"Logged in as {user.username}")
+                
+                # Redirect to home page or another page
+                return redirect('home')  # Replace 'home' with your desired URL name
         else:
             form.add_error(None, "Please fill in all fields.")
     else:
