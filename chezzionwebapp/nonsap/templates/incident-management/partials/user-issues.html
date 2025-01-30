@@ -3,9 +3,8 @@
         <thead>
             <tr>
                 <th scope="col">Sl. No</th>
-                <th scope="col">Issue ID</th>
+                <th scope="col">Complaint ID</th>
                 <th scope="col">Title</th>
-                <!-- <th scope="col">Description</th> -->
                 <th scope="col">Date</th>
                 <th scope="col">Time</th>
                 <th scope="col">Status</th>
@@ -16,9 +15,8 @@
             {% for issue in issues %}
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
-                <th scope="row">CHZISU{% with forloop.counter|stringformat:"04d" as counter %}{{ counter }}{% endwith %}</th>
+                <th>{{issue.custom_id}}</th>
                 <td>{{ issue.issue }}</td>
-                <!-- <td>{{ issue.description }}</td> -->
                 <td>{{ issue.report_date }}</td>
                 <td>{{ issue.report_time }}</td>
                 <td>
