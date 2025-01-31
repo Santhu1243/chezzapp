@@ -12,6 +12,7 @@ STATUS_CHOICES = [
 
 class IncidentIssue(models.Model):
     issue = models.CharField(max_length=255)
+    custom_id = models.CharField(max_length=255, unique=True, blank=True)
     description = models.TextField()
     reporter = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reported_issues'
@@ -26,13 +27,22 @@ class IncidentIssue(models.Model):
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICES,
-        default='active',
-    )
+         max_length=10,
+         choices=STATUS_CHOICES,
+         default='active',
+     )
+    
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  
+        if not self.custom_id:
+            self.custom_id = f"CHEZZ-ISSUE-{self.id:05d}"
+            super().save(*args, **kwargs)  
 
     def __str__(self):
-        return self.issue
+        return self.title
+
+   
 
 
 
@@ -46,7 +56,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     reported_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    custom_id = models.CharField(max_length=255, unique=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
