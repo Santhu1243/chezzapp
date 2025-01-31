@@ -40,8 +40,9 @@ class IncidentIssue(models.Model):
             super().save(*args, **kwargs)  
 
     def __str__(self):
-        return self.title
-
+        return self.issue
+    class Meta:
+            db_table = 'nonsap_incidentissue'
    
 
 
@@ -59,6 +60,7 @@ class Issue(models.Model):
     custom_id = models.CharField(max_length=255, unique=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
 
     def __str__(self):
         return self.title
@@ -95,8 +97,4 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.file.name
-
-from django.db import models
-from django.contrib.auth.models import User
-
 

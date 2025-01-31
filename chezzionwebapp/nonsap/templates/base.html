@@ -18,10 +18,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- jq-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
 </head>
 
 <body>
@@ -98,20 +98,27 @@
             // Get the current date 
             var currentDate = new Date();
             $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB')); // Formats the date to dd/mm/yyyy
-            $('#datepicker').datepicker({
-                format: 'dd/mm/yyyy', // Adjust the format if needed
+            $('#reportdatepicker').datepicker({
                 autoclose: true
             });
 
-            
-            // get the current time
+            // Get the current time
             var hours = currentDate.getHours();
             var minutes = currentDate.getMinutes();
             var formattedTime = (hours < 10 ? '0' : '') + hours + ':' + (minutes < 10 ? '0' : '') + minutes;
-            $('#reporttimepicker').val(formattedTime); // Set the formatted time in the input field
+            $('#reporttimepicker').val(formattedTime);
+
+            // Use a timepicker instead of a datepicker for time selection
+            $('#reporttimepicker').timepicker({
+                timeFormat: 'HH:mm A', // 24-hour format
+                dynamic: false,
+                dropdown: true,
+                scrollbar: true
+            });
         });
     </script>
-    
+
+
 
 </body>
 

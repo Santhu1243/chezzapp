@@ -9,7 +9,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>custom id</th>
+                    <th>Issue id</th>
                     <th>Username</th>
                     <th>Issue Title</th>
                     <th>Status</th>
@@ -22,7 +22,7 @@
             <tbody>
                 {% for issue in issues %}
                 <tr>
-                    <td>{{ issue.id }}</td>
+                    <td>{{ issue.custom_id }}</td>
                     <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
                     <td>
@@ -40,7 +40,7 @@
                         <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
                     </td>
                     <td>
-                                     {% include 'master/partials/assign_staff_form.html' %}
+                        {% include 'master/partials/assign_staff_form.html' %}
 
                     </td>
                 </tr>
@@ -66,7 +66,7 @@
                 <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
-               {% include 'master/partials/status_update_form.html' %}
+                {% include 'master/partials/status_update_form.html' %}
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
                     {% if issue.assigned_staff %}
@@ -76,7 +76,7 @@
                     {% endif %}
                 </p>
                 <a class="btn btn-primary mb-2" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
-               {% include 'master/partials/assign_staff_form.html' %}
+                {% include 'master/partials/assign_staff_form.html' %}
             </div>
         </div>
         {% empty %}
