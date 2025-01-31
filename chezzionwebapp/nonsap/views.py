@@ -21,9 +21,6 @@ from django.utils.timezone import now
 from .models import Attachment
 from django.urls import path
 from .models import IncidentIssue, User
-
-
-
 # Home view
 @login_required
 def home(request):
@@ -139,6 +136,7 @@ def superadmin_dashboard(request):
 
 
 @login_required
+
 def raise_issue(request):
     if request.method == 'POST':
         form = IncidentIssueForm(request.POST, request.FILES)
@@ -147,6 +145,7 @@ def raise_issue(request):
             # Create the issue object and save it
             incident_issue = form.save(commit=False)
             incident_issue.reporter = request.user
+            
             incident_issue.save()
 
             # Save the attachments in the `nonsap_attachment` table
@@ -196,7 +195,8 @@ def raise_issue(request):
 
 
 def success(request, issue_id):
-    return render(request, 'incident-management/success.html', {'issue_id': issue_id})
+
+    return render(request, 'incident-management/success.html', {'issue_id': issue_id })
 
 @login_required
 def viewassigned(request):
@@ -311,7 +311,7 @@ def issue_details(request, issue_id):
 from django.shortcuts import render
 from django.db.models import F
 from .models import IncidentIssue 
-def superadmin_dashboard(request):
+def superadmin_dashboard_view(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = (
             IncidentIssue.objects.select_related('reporter', 'assigned_staff')

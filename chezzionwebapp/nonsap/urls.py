@@ -26,6 +26,4 @@ urlpatterns = [
     path('superadmin-login/', views.superadmin_login_view, name='superadmin_login'),
     path('staff-login/', views.staff_login_view, name='staff_login'),
 ]
-
-
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
