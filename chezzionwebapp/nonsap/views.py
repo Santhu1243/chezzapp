@@ -14,12 +14,16 @@ from .models import IncidentIssue, Comment
 from .forms import CommentForm
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from .models import Issue, User  # Adjust model imports as per your project
-from .models import Issue  # Ensure the name matches exactly
+from .models import Issue, User 
+from .models import Issue  
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from .models import Attachment
 from django.urls import path
+from .models import IncidentIssue, User
+
+
+
 # Home view
 @login_required
 def home(request):
@@ -79,20 +83,19 @@ def login_view(request):
             # Authenticate the user
             user = authenticate(request, username=username, password=password)
             
-            if user is not None:
-                if user.is_staff or user.is_superuser:
-                    # Add an error message if the user is staff or superuser
-                    form.add_error(None, "Access denied. Only regular users are allowed.")
-                else:
-                    # Log the user in
-                    login(request, user)
-                    messages.success(request, f"Logged in as {user.username}")
-                    
-                    # Redirect to home page or another page
-                    return redirect('home')  # Replace 'home' with your desired URL name
-            else:
+            if user is None:
                 # If authentication fails, return an error
                 form.add_error(None, "Invalid username or password.")
+            elif user.is_staff or user.is_superuser:
+                # Add an error message if the user is staff or superuser
+                form.add_error(None, "Access denied. Only regular users are allowed.")
+            else:
+                # Log the user in
+                login(request, user)
+                messages.success(request, f"Logged in as {user.username}")
+                
+                # Redirect to home page or another page
+                return redirect('home')  # Replace 'home' with your desired URL name
         else:
             form.add_error(None, "Please fill in all fields.")
     else:
@@ -379,18 +382,45 @@ def assign_issue(request, issue_id):
 
 
 from django.shortcuts import get_object_or_404, redirect
-from .models import IncidentIssue, User
+
+
 
 def assign_staff(request, issue_id):
     issue = IncidentIssue.objects.get(id=issue_id)
+    
     if request.method == 'POST':
         staff_id = request.POST.get('staff_id')
         staff = User.objects.get(id=staff_id)
         issue.assigned_staff = staff
         issue.save()
+        
+        # Sending Email to Staff Member
+        staff_subject = 'New Complaint Assigned to You'
+        staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.id}). Please take appropriate action.'
+        send_mail(
+            staff_subject,
+            staff_message,
+            settings.DEFAULT_FROM_EMAIL,  
+            [staff.email],
+            fail_silently=False,
+        )
+
+        # Sending Email to User (Optional)
+        user_subject = 'Your Complaint has been Assigned to Staff'
+        user_message = f'Hello {issue.user.username},\n\nYour complaint CHEZ-ISSUE-(ID: {issue.id}) has been successfully assigned to {staff.username}. They will reach out to you soon.'
+        send_mail(
+            user_subject,
+            user_message,
+            settings.DEFAULT_FROM_EMAIL,  
+            [issue.user.email],
+            fail_silently=False,
+        )
+        
         return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+
     staff_members = User.objects.filter(is_staff=True)
-    return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})  # Redirect back to the dashboard
+    return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})
+ # Redirect back to the dashboard
 
 
 

@@ -139,7 +139,7 @@ STATIC_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default backend for session management
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
 
 
 # settings.py
@@ -150,12 +150,12 @@ LOGIN_REDIRECT_URL = '/'
 
 # Email settings for sending emails
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
-EMAIL_PORT = 587  # SMTP port (use 465 for SSL, 587 for TLS)
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_PORT = 587  
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'chezzionweb@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'bxnn ugps gdck smdw'  # Your email password
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default sender email address
+EMAIL_HOST_USER = 'chezzionweb@gmail.com'  
+EMAIL_HOST_PASSWORD = 'bxnn ugps gdck smdw'  
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  #
 
 
 
