@@ -1,0 +1,27 @@
+{% extends 'admin-base.html' %}
+
+{% block content %}
+<h2>Assign Staff to Issue (ID: {{ issue.id }})</h2>
+
+<h3>Issue Details</h3>
+<p><strong>Title:</strong> {{ issue.title }}</p>
+<p><strong>Description:</strong> {{ issue.description }}</p>
+<p><strong>Submitted by:</strong> {{ issue.user.username }}</p>
+
+<h3>Assign to Staff</h3>
+<form method="post">
+    {% csrf_token %}
+
+    <label for="staff_id">Select Staff Member:</label>
+    <select name="staff_id" id="staff_id" required>
+        <option value="">--Select Staff Member--</option>
+        {% for staff in staff_members %}
+        <option value="{{ staff.id }}">{{ staff.username }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Assign Staff</button>
+</form>
+
+<p><a href="{% url 'nonsap:superadmin_dashboard' %}">Back to Dashboard</a></p>
+{% endblock %}

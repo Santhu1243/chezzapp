@@ -21,6 +21,9 @@ from django.utils.timezone import now
 from .models import Attachment
 from django.urls import path
 from .models import IncidentIssue, User
+
+
+
 # Home view
 @login_required
 def home(request):
@@ -136,7 +139,6 @@ def superadmin_dashboard(request):
 
 
 @login_required
-
 def raise_issue(request):
     if request.method == 'POST':
         form = IncidentIssueForm(request.POST, request.FILES)
@@ -145,7 +147,6 @@ def raise_issue(request):
             # Create the issue object and save it
             incident_issue = form.save(commit=False)
             incident_issue.reporter = request.user
-            
             incident_issue.save()
 
             # Save the attachments in the `nonsap_attachment` table
@@ -195,8 +196,9 @@ def raise_issue(request):
 
 
 def success(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    return render(request, 'incident-management/success.html', {'issue': issue})
 
-    return render(request, 'incident-management/success.html', {'issue_id': issue_id })
 
 @login_required
 def viewassigned(request):
@@ -311,7 +313,7 @@ def issue_details(request, issue_id):
 from django.shortcuts import render
 from django.db.models import F
 from .models import IncidentIssue 
-def superadmin_dashboard_view(request):
+def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = (
             IncidentIssue.objects.select_related('reporter', 'assigned_staff')
@@ -431,27 +433,20 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 
 def assigned_complaints(request):
-    # Check if the user is authenticated and is a staff member
     if request.user.is_authenticated and request.user.is_staff:
-        # Fetch issues assigned to the logged-in staff member
         assigned_issues = IncidentIssue.objects.filter(assigned_to_id=request.user.id)
         
-        # Debugging: Print the assigned issues for confirmation
         print("Assigned Issues:", assigned_issues)
         
-        # Paginate the issues: Show 10 issues per page
         paginator = Paginator(assigned_issues, 10)
         page = request.GET.get('page')  # Get the page number from the query parameters
         issues_page = paginator.get_page(page)  # Get the paginated issues
         
-        # Debugging: Print the paginated issues
         print("Paginated Issues:", issues_page)
         
-        # Pass the issues to the template
         context = {'assigned_issues': issues_page}
         return render(request, 'admin/view-assigned.html', context)
     
-    # If user is not authenticated or not staff, redirect or show access denied
     return render(request, 'access-denied.html')
 
 
