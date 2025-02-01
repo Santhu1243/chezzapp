@@ -11,11 +11,7 @@
     <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="description" content="Chezzion Web App - Your staff dashboard and issue management system.">
-    <style>
-        html {
-            scroll-behavior: smooth;
-        }
-    </style>
+
 </head>
 
 <body>
@@ -23,7 +19,7 @@
     {% if user.is_authenticated %}
     <nav class="navbar bg-light navbar-expand-md">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'nonsap:admin-dashboard' %}">
+            <a class="navbar-brand" href="{% url 'nonsap:superadmin_dashboard' %}">
                 <img class="nav-logo" src="{% static 'assets/img/logo-icon.png' %}" alt="logo">
             </a>
             <button class="navbar-toggler text-dark custom-navbar" type="button" data-bs-toggle="offcanvas"
@@ -40,12 +36,10 @@
                 </div>
                 <div class="offcanvas-body">
                     <div class="navbar-nav justify-content-end flex-grow-1 pe-3 text-dark">
-                        <a class="nav-item nav-link" href="{% url 'nonsap:admin-dashboard' %}">
+                        <a class="nav-item nav-link" href="{% url 'nonsap:superadmin_dashboard' %}">
                             <span><i class="fa-solid fa-gauge"></i></span> Dashboard
                         </a>
-                        <a class="nav-item nav-link" href="{% url 'nonsap:assigned_complaints' %}">
-                            <span><i class="fa-solid fa-list-check"></i></span> View Issues Assigned
-                        </a>
+
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -53,11 +47,18 @@
                                 <i class="fa-solid fa-user"></i> {{ request.user.username }}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><a class="dropdown-item" href="#">Change Password</a></li>
-                                <li><a class="dropdown-item" href="{% url 'nonsap:logout' %}">
-                                        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
-                                    </a></li>
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li>
+                                    <form method="POST" action="{% url 'nonsap:logout' %}"
+                                        class="d-flex align-items-center" id="logout-form">
+                                        {% csrf_token %}
+                                        <a class="dropdown-item" type="button" class="btn btn-link "
+                                            onclick="confirmLogout()">
+                                            Logout <i class="fa-solid fa-right-from-bracket"></i>
+                                        </a>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                     </div>

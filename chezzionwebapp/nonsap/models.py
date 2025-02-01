@@ -23,7 +23,6 @@ class IncidentIssue(models.Model):
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
     assigned_date = models.DateTimeField(auto_now_add=True)
-    assigned_staff = models.ForeignKey(User, related_name='assigned_issues', on_delete=models.SET_NULL, null=True, blank=True)
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -75,15 +74,21 @@ class Comment(models.Model):
     comment_text = models.TextField()
     commented_by = models.ForeignKey(User, on_delete=models.CASCADE)
     commented_at = models.DateTimeField(auto_now_add=True)
-
+    image = models.ImageField(upload_to='comments/', blank=True, null=True)
     def __str__(self):
         return f"Comment by {self.commented_by} on {self.commented_at}"
 
 
 from django import forms
+from .models import Comment
 
-class CommentForm(forms.Form):
-    comment_text = forms.CharField(widget=forms.Textarea, required=True)
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['comment_text', 'image']  # Add 'image' field
+
+    image = forms.ImageField(required=False)  # Optional image upload
+
 
 
 class IssueImage(models.Model):

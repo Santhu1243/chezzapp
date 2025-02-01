@@ -9,33 +9,61 @@
                     {% if comment.commented_by.is_superuser %}
                     <span class="user-badge superuser-badge" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-title="{{ comment.commented_by }}">
-                        <i class="fa-solid fa-user-tie"></i></span>
+                        <i class="fa-solid fa-user-tie"></i>
+                    </span>
                     {% elif comment.commented_by.is_staff %}
                     <span class="user-badge staff-badge" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="{{ comment.commented_by }}"><i class="fa-solid fa-user-tie"></i></span>
+                        data-bs-title="{{ comment.commented_by }}">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </span>
                     {% else %}
                     <span class="user-badge regular-badge" data-bs-toggle="tooltip" data-bs-placement="left"
-                        data-bs-title="{{ comment.commented_by }}"><i class="fa-solid fa-user"></i></span>
+                        data-bs-title="{{ comment.commented_by }}">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
                     {% endif %}
                 </strong>
                 <span class="comment-text">{{ comment.comment_text }}</span>
                 <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+
+                {% if comment.image %}
+                <div class="comment-image">
+                    <img src="{{ comment.image.url }}" alt="Comment Image"
+                        style="max-width: 100px; height: auto; border-radius: 5px;">
+                </div>
+                {% endif %}
 
             </li>
             {% empty %}
             <li class="no-comments">No comments yet. Be the first to comment!</li>
             {% endfor %}
         </ul>
+
+
     </div>
 
 
 
-    <form method="post" class="mt-4">
+    <form method="post" enctype="multipart/form-data" class="mt-4">
         {% csrf_token %}
-        {{ form.as_p }}
 
+        <!-- Comment Text Input -->
+        <div class="mb-3">
+            <label for="id_comment_text" class="form-label">Message:</label>
+            <textarea name="comment_text" id="id_comment_text" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- Image Upload Input -->
+        <div class="mb-3">
+            <label for="id_image" class="form-label">Upload Image:</label>
+            <input type="file" name="image" id="id_image" class="form-control">
+        </div>
+
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Add Message</button>
     </form>
+
+
 </div>
 
 

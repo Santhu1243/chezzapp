@@ -36,24 +36,26 @@ class IncidentIssueForm(forms.ModelForm):
         return instance
 
 from django import forms
-from .models import Comment  # Replace with the actual model name
+from .models import Comment  
 
-class CommentForm(forms.Form):
-    comment = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',  # Bootstrap class for textarea styling
-            'placeholder': 'Write your comment here...',
-            'rows': 4,
-        }),
-        max_length=500
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["comment_text", "image"]  # Include image field
+
+    comment_text = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3})
     )
+    image = forms.ImageField(required=False, widget=forms.FileInput(attrs={"class": "form-control"}))
+
+
 
     def save(self, incident, user, commit=True):
         """
         Save the form data to the database, associating it with an incident and user.
         """
         comment_instance = Comment(
-            comment=self.cleaned_data['comment'],
+            comment_text=self.cleaned_data['comment_text'],
             incident=incident,  
             user=user           
         )

@@ -88,8 +88,7 @@ img.nav-logo {
     align-items: center;
     justify-content: center;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    /* Dynamically adjusts columns */
-    column-gap: 10px;
+    gap: 20px;
 }
 
 .box {
@@ -143,8 +142,8 @@ p.card-text {
 
 .attachment-img {
     width: 300px;
-    height: 300px;
     object-fit: cover;
+    border-radius: 25px;
 }
 
 ul.attachment-list {
@@ -228,4 +227,25 @@ a {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.highlight {
+    color: #00488e !important;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.sort-btn {
+    background: none;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.sort-btn:hover {
+    text-decoration: underline;
+}
+
+.fas {
+    margin-left: 5px;
 }
