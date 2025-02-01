@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "superuser-base.html" %}
 
 {% block start %}
 {% if user.is_authenticated and user.is_superuser %}
@@ -15,14 +15,14 @@
                     <th>Status</th>
                     <th>Reported on</th>
                     <th>Assigned To</th>
-                    <th>Action</th>
                     <th>Assign Staff</th>
                 </tr>
             </thead>
             <tbody>
                 {% for issue in issues %}
                 <tr>
-                    <td>{{ issue.custom_id }}</td>
+                    <td> <a class="highlight" href="{% url 'nonsap:view_status' issue.id %}">{{ issue.custom_id }}</a>
+                    </td>
                     <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
                     <td>
@@ -30,15 +30,13 @@
                     </td>
                     <td>{{ issue.report_date }}</td>
                     <td>
-                        {% if issue.assigned_staff %}
-                        {{ issue.assigned_staff.username }}
+                        {% if issue.assigned_to %}
+                        {{ issue.assigned_to.username }}
                         {% else %}
                         Not Assigned
                         {% endif %}
                     </td>
-                    <td>
-                        <a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
-                    </td>
+
                     <td>
                         {% include 'master/partials/assign_staff_form.html' %}
 

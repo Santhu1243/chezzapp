@@ -1,27 +1,32 @@
-<h2 class="mt-5">Attachments</h2>
+<div class="container mt-5 mb-5">
 
-<ul class="attachment-list issuebox-grid">
-    {% for attachment in attachments %}
-    <li>
-        <a href="{{ attachment.file.url }}" type="button" data-bs-toggle="modal"
-            data-bs-target="#modal-{{ forloop.counter }}">
-            <img class="img-fluid attachment-img" src="{{ attachment.file.url }}" alt="{{ attachment.file.name }}">
-        </a>
-    </li>
+    <h2 class="mt-5">Attachments</h2>
 
-    <!-- Modal -->
-    <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1"
-        aria-labelledby="modalLabel-{{ forloop.counter }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <img class="img-fluid" src="{{ attachment.file.url }}" alt="{{ attachment.file.name }}">
+    <ul class="attachment-list issuebox-grid">
+        {% for attachment in attachments %}
+        <li>
+            <a href="{{ attachment.file.url }}" type="button" data-bs-toggle="modal"
+                data-bs-target="#modal-{{ forloop.counter }}">
+                <img class="img-fluid attachment-img" src="{{ attachment.file.url }}" alt="{{ attachment.file.name }}">
+            </a>
+        </li>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1"
+            aria-labelledby="modalLabel-{{ forloop.counter }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img class="img-fluid" src="{{ attachment.file.url }}" alt="{{ attachment.file.name }}">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </ul>
+
+
+</div>

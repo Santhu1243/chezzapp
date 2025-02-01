@@ -21,7 +21,11 @@ from django.utils.timezone import now
 from .models import Attachment
 from django.urls import path
 from .models import IncidentIssue, User
-
+from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render
+from django.db.models import F
+from .forms import StaffLoginForm, SuperAdminLoginForm
+from django.shortcuts import redirect
 
 
 # Home view
@@ -47,10 +51,17 @@ def authView(request):
     return render(request, 'registration/register.html', {'form': form})
 
 # Logout view
-@login_required
 def logout_view(request):
-    logout(request)
-    return redirect('login')  # Ensure 'login' URL exists in urls.py
+    # Check if the user is superuser, staff, or regular user
+    if request.user.is_superuser:
+        logout(request)
+        return redirect('superadmin_login')  # Redirect to superuser dashboard
+    elif request.user.is_staff:
+        logout(request)
+        return redirect('staff_login')  # Redirect to staff dashboard
+    else:
+        logout(request)
+        return redirect('login')# Ensure 'login' URL exists in urls.py
 
 # Login form class
 class LoginForm(forms.Form):
@@ -196,29 +207,10 @@ def raise_issue(request):
 
 
 def success(request, issue_id):
-    issue = get_object_or_404(Issue, id=issue_id)
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
     return render(request, 'incident-management/success.html', {'issue': issue})
 
 
-@login_required
-def viewassigned(request):
-    # Fetch the assigned issues for the logged-in user
-    assigned_issues = request.user.assigned_issues.all()
-
-    # Optionally, print to debug the query result
-    print(assigned_issues)  # Check if issues are being retrieved
-
-    return render(request, 'admin/view-assigned.html', {'assigned_issues': assigned_issues})
-
-
-
-
-
-# @login_required
-# def user_issues(request):
-#     # Fetch the issues reported by the logged-in user
-#     issues = IncidentIssue.objects.filter(reporter=request.user)
-#     return render(request, 'incident-management/dashboard.html', {'issues': issues})
 
 
 
@@ -255,7 +247,6 @@ def dashboard_view(request):
 
 
 
-from django.shortcuts import redirect
 
 @login_required
 def view_status(request, issue_id):
@@ -267,18 +258,21 @@ def view_status(request, issue_id):
 
     # Handle the comment form submission
     if request.method == "POST":
-        form = CommentForm(request.POST)
+        form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
             # Create a new comment instance
             comment = Comment(
-                comment_text=form.cleaned_data['comment'],  # Use the correct field name
+                comment_text=form.cleaned_data['comment_text'], 
                 issue=issue,
                 commented_by=request.user
             )
             comment.save()
+            print(comment.image)
 
+        else:
+            print(form.errors) 
             # Redirect to avoid re-submission on refresh
-            return redirect('nonsap:view_status', issue_id=issue.id)
+            # return redirect('nonsap:view_status', issue_id=issue.id)
     else:
         form = CommentForm()
 
@@ -310,14 +304,11 @@ def issue_details(request, issue_id):
     })
 
 
-from django.shortcuts import render
-from django.db.models import F
-from .models import IncidentIssue 
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
         issues = (
-            IncidentIssue.objects.select_related('reporter', 'assigned_staff')
-            .annotate(reporter_name=F('reporter__username'), assigned_staff_name=F('assigned_staff__username'))
+            IncidentIssue.objects.select_related('reporter', 'assigned_to')
+            .annotate(reporter_name=F('reporter__username'), assigned_to_name=F('assigned_to__username'))
         )
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
         status_choices = Issue._meta.get_field('status').choices
@@ -370,20 +361,6 @@ def assign_issue(request, issue_id):
         return redirect('master/superadmin_dashboard.html')  # Replace with your issue list URL
 
 
-# @login_required
-# def staff_dashboard(request):
-#     if not request.user.is_staff:
-#         return redirect('home')  # Redirect non-staff users
-
-#     # Fetch issues assigned to the logged-in staff member
-#     assigned_issues = Issue.objects.filter(assigned_to=request.user)
-
-#     return render(request, 'admin/admin-dashboard.html', {'assigned_issues': assigned_issues})
-
-
-
-
-from django.shortcuts import get_object_or_404, redirect
 
 
 
@@ -392,56 +369,59 @@ def assign_staff(request, issue_id):
     
     if request.method == 'POST':
         staff_id = request.POST.get('staff_id')
-        staff = User.objects.get(id=staff_id)
-        issue.assigned_staff = staff
-        issue.save()
-        
-        # Sending Email to Staff Member
-        staff_subject = 'New Complaint Assigned to You'
-        staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.id}). Please take appropriate action.'
-        send_mail(
-            staff_subject,
-            staff_message,
-            settings.DEFAULT_FROM_EMAIL,  
-            [staff.email],
-            fail_silently=False,
-        )
+        if staff_id:
+            staff = User.objects.get(id=staff_id)
+            issue.assigned_to = staff
+            issue.save()
+            
+            # Sending Email to Staff Member
+            staff_subject = 'New Complaint Assigned to You'
+            staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.id}). Please take appropriate action.'
+            send_mail(
+                staff_subject,
+                staff_message,
+                settings.DEFAULT_FROM_EMAIL,  
+                [staff.email],
+                fail_silently=False,
+            )
 
-        # Sending Email to User (Optional)
-        user_subject = 'Your Complaint has been Assigned to Staff'
-        user_message = f'Hello {issue.user.username},\n\nYour complaint CHEZ-ISSUE-(ID: {issue.id}) has been successfully assigned to {staff.username}. They will reach out to you soon.'
-        send_mail(
-            user_subject,
-            user_message,
-            settings.DEFAULT_FROM_EMAIL,  
-            [issue.user.email],
-            fail_silently=False,
-        )
-        
-        return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+            # Sending Email to User (Reporter)
+            user_subject = 'Your Complaint has been Assigned to Staff'
+            user_message = f'Hello {issue.reporter.username},\n\nYour complaint CHEZ-ISSUE-{issue.id} has been successfully assigned to {staff.username}. They will reach out to you soon.'
+            send_mail(
+                user_subject,
+                user_message,
+                settings.DEFAULT_FROM_EMAIL,  
+                [issue.reporter.email],
+                fail_silently=False,
+            )
+            
+            return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+        else:
+            # Handle case where staff_id is not provided
+            return redirect('nonsap:assign_staff', issue_id=issue_id)  # Redirect back with error
 
+    # Get all staff members for the assignment form
     staff_members = User.objects.filter(is_staff=True)
     return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})
- # Redirect back to the dashboard
 
 
 
 
 
-
-from django.shortcuts import render, redirect
-from django.core.paginator import Paginator
 
 def assigned_complaints(request):
     if request.user.is_authenticated and request.user.is_staff:
         assigned_issues = IncidentIssue.objects.filter(assigned_to_id=request.user.id)
         
+        # Debugging print statement
         print("Assigned Issues:", assigned_issues)
         
-        paginator = Paginator(assigned_issues, 10)
+        paginator = Paginator(assigned_issues, 5)  # Paginate the issues
         page = request.GET.get('page')  # Get the page number from the query parameters
         issues_page = paginator.get_page(page)  # Get the paginated issues
         
+        # Debugging print statement for paginated issues
         print("Paginated Issues:", issues_page)
         
         context = {'assigned_issues': issues_page}
@@ -449,6 +429,12 @@ def assigned_complaints(request):
     
     return render(request, 'access-denied.html')
 
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import IncidentIssue, Comment
+from .forms import CommentForm
 
 @login_required
 def view_details(request, issue_id):
@@ -460,15 +446,14 @@ def view_details(request, issue_id):
 
     # Handle the comment form submission
     if request.method == "POST":
-        form = CommentForm(request.POST)
+        form = CommentForm(request.POST, request.FILES)  # Include FILES for image upload
         if form.is_valid():
             # Create a new comment instance
-            comment = Comment(
-                comment=form.cleaned_data['comment'],  # Assuming `comment` is the form field
-                issue=issue,  # Associate the comment with the issue
-                commented_by=request.user  # Associate the comment with the logged-in user
-            )
-            comment.save()
+            comment = form.save(commit=False)  # Don't save yet
+            comment.issue = issue  # Associate the comment with the issue
+            comment.commented_by = request.user  # Associate the comment with the logged-in user
+            comment.save()  # Now save the comment
+            return redirect('view_details', issue_id=issue.id)  # Redirect to the same page after posting
     else:
         form = CommentForm()
 
@@ -487,18 +472,11 @@ def view_details(request, issue_id):
     )
 
 
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from .models import IncidentIssue, STATUS_CHOICES
-
-from django.core.mail import send_mail
-from django.conf import settings
 from django.shortcuts import get_object_or_404, render
-from django.contrib import messages
-from django.http import HttpResponseForbidden
-from .models import IncidentIssue  # Assuming this is the model you're using
 
 
 @login_required
@@ -548,12 +526,12 @@ def send_status_change_email(issue, old_status, new_status):
     )
 
     # Send email to the assigned staff if the staff has been assigned
-    if issue.assigned_staff:
+    if issue.assigned_to:
         send_mail(
             f'New Issue Assigned to You: #{issue.id}',
             f'You have been assigned to the issue "{issue.issue}". The status is now "{new_status}".',
             settings.DEFAULT_FROM_EMAIL,
-            [issue.assigned_staff.email],
+            [issue.assigned_to.email],
             fail_silently=False,
         )
 
@@ -562,9 +540,7 @@ def send_status_change_email(issue, old_status, new_status):
 # login pages 
 
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
-from .forms import StaffLoginForm, SuperAdminLoginForm
-from django.contrib import messages
+
 
 # Staff login view
 def staff_login_view(request):
