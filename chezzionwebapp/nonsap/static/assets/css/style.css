@@ -181,6 +181,13 @@ li.regular-user {
     border-bottom: 1px solid #e3dfdf;
 }
 
+li.staff {
+    margin: 8px;
+    padding: 10px 8px;
+    color: black;
+    border-bottom: 1px solid #e3dfdf;
+}
+
 .regular-badge {
     padding: 5px 10px;
     background: #f8982d;
@@ -197,8 +204,15 @@ li.staff {
     flex-direction: row-reverse;
 }
 
+span.user-badge.staff-badge {
+    padding: 5px 11px;
+    background: #000000;
+    border-radius: 50px;
+    color: white;
+}
+
 .superuser-badge {
-    padding: 5px 10px;
+    padding: 5px 11px;
     background: #004c93;
     border-radius: 50px;
     color: white;

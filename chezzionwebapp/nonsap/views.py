@@ -537,7 +537,7 @@ def update_status(request, issue_id):
     if 'from_dashboard' in request.GET:
         template_name = 'master/superadmin_dashboard.html'
     else:
-        template_name = 'admin/view-details.html'
+        template_name = 'master/view-details.html'
 
     context = {
         'issue': issue,
