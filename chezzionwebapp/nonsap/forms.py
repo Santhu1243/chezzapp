@@ -2,17 +2,30 @@ from django import forms
 from .models import IncidentIssue
 from django.contrib.auth.models import User
 
+from django import forms
+
+class IncidentForm(forms.ModelForm):
+   
+    def clean(self):
+        cleaned_data = super().clean()
+        priority = cleaned_data.get('priority')
+        custom_days = cleaned_data.get('custom_days')
+
+        # Validation for custom days when P4 is selected
+        if priority == 'P4' and not custom_days:
+            raise forms.ValidationError('Please enter custom days for P4 priority.')
+
+        return cleaned_data
+    class Meta:
+        model = IncidentIssue
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time','priority','resolution_date','attachment', 'root_cause', ]
 
 
 class IncidentIssueForm(forms.ModelForm):
-    report_time = forms.TimeField(
-        input_formats=['%I:%M %p'],  # Accepts 'hh:mm AM/PM'
-        widget=forms.TimeInput(format='%I:%M %p', attrs={'class': 'form-control', 'placeholder': 'hh:mm AM/PM'})
-    )
-
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'root_cause', ]
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time','priority','resolution_date','attachment', 'root_cause', ]
+
 
     def clean_reporter(self):  # sourcery skip: raise-from-previous-error
         """ Custom validation for the reporter field. """

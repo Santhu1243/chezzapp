@@ -9,10 +9,20 @@ STATUS_CHOICES = [
     ('inprogress', 'inprogress'),
     ('resolved', 'Resolved'),
 ]
+PRIORITY_CHOICES = [
+    ('P1', 'P1 - High'),
+    ('P2', 'P2 - Medium'),
+    ('P3', 'P3 - Low'),
+    ('P4', 'P4 - Custom'),
+]
+
+
+
+
 
 class IncidentIssue(models.Model):
-    issue = models.CharField(max_length=255)
-    custom_id = models.CharField(max_length=255, unique=True, blank=True)
+    issue = models.CharField(max_length=255) # Issue title
+    custom_id = models.CharField(max_length=255, unique=True, blank=True)   
     description = models.TextField()
     reporter = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reported_issues'
@@ -20,10 +30,8 @@ class IncidentIssue(models.Model):
     email = models.EmailField()
     report_date = models.DateField()
     report_time = models.TimeField()
-    assigned_to = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True)
-    assigned_date = models.DateTimeField(auto_now_add=True)
-    assigned_staff = models.ForeignKey(User, related_name='assigned_issues', on_delete=models.SET_NULL, null=True, blank=True)
+    priority = models.CharField(max_length=2, choices=PRIORITY_CHOICES) 
+    resolution_date = models.DateField(null=True, blank=True)  # Format: YYYY-MM-DD
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -31,6 +39,7 @@ class IncidentIssue(models.Model):
          choices=STATUS_CHOICES,
          default='active',
      )
+    
     
 
     def save(self, *args, **kwargs):
@@ -41,6 +50,9 @@ class IncidentIssue(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def __str__(self):
+        return f"Incident {self.id} - {self.priority}"
 
    
 

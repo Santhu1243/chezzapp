@@ -21,6 +21,10 @@ from django.utils.timezone import now
 from .models import Attachment
 from django.urls import path
 from .models import IncidentIssue, User
+
+from .forms import IncidentForm
+from .models import IncidentIssue
+
 # Home view
 @login_required
 def home(request):
@@ -191,8 +195,6 @@ def raise_issue(request):
         form = IncidentIssueForm()
 
     return render(request, 'incident-management/raise-issue.html', {'form': form})
-
-
 
 def success(request, issue_id):
 

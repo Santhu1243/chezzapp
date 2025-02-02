@@ -21,6 +21,7 @@
                     <input type="text" name="issue" id="issue-title" class="form-control" required>
                 </div>
             </div>
+        
 
             <!-- Issue Description Field -->
             <div class="form-group d-md-flex mt-5">
@@ -94,22 +95,23 @@
                 </div>
                 <div class="col-md-9 col-sm-12">
                     <select id="priority" name="priority" class="form-control">
-                        <option value="p1">P1 (Resolve in 1 day)</option>
-                        <option value="p2">P2 (Resolve in 3 days)</option>
-                        <option value="p3">P3 (Resolve in 6-7 days)</option>
-                        <option value="p4">P4 (Custom)</option>
+                        <option value="P1">P1 (Resolve in 1 day)</option>
+                        <option value="P2">P2 (Resolve in 3 days)</option>
+                        <option value="P3">P3 (Resolve in 6-7 days)</option>
+                        <option value="P4">P4 (Custom)</option>
                     </select>
                 </div>
             </div>
 
-            <div class="form-group d-md-flex mt-5">
+            <!-- Custom Days for P4 -->
+            <div class="form-group d-md-flex mt-5" id="custom-days-container" style="display: none;">
                 <div class="col-md-3 col-sm-12">
-                    <label for="days" class="form-label">
-                        Resolution Time (Days)
+                    <label for="custom-days" class="form-label">
+                        Number of Days (Custom)
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="number" id="days" name="days" min="1" value="1" class="form-control" disabled>
+                    <input type="number" id="custom-days" name="custom_days" class="form-control" disabled>
                 </div>
             </div>
 
@@ -211,8 +213,7 @@
         });
         validateForm(); // Initial validation check
     });
-</script>
-<script>
+
     $(document).ready(function () {
         function calculateResolutionDate(daysToAdd) {
             let currentDate = new Date();
@@ -229,10 +230,10 @@
             let priority = $('#priority').val();
             let daysToAdd;
 
-            if (priority === "p1") daysToAdd = 1;
-            else if (priority === "p2") daysToAdd = 3;
-            else if (priority === "p3") daysToAdd = 6;
-            else if (priority === "p4") daysToAdd = parseInt($('#days').val());
+            if (priority === "P1") daysToAdd = 1;
+            else if (priority === "P2") daysToAdd = 3;
+            else if (priority === "P3") daysToAdd = 6;
+            else if (priority === "P4") daysToAdd = parseInt($('#custom-days').val()) || 0;
 
             $('#resolutionDate').val(calculateResolutionDate(daysToAdd));
         }
@@ -241,18 +242,20 @@
         $('#priority').change(function () {
             let priority = $(this).val();
             
-            if (priority === "p4") {
-                $('#days').prop("disabled", false);
+            if (priority === "P4") {
+                $('#custom-days-container').show();
+                $('#custom-days').prop("disabled", false);
             } else {
-                $('#days').prop("disabled", true);
-                $('#days').val(priority === "p1" ? 1 : priority === "p2" ? 3 : 6);
+                $('#custom-days-container').hide();
+                $('#custom-days').prop("disabled", true);
+                $('#custom-days').val(''); // Clear custom days input
             }
 
             updateResolutionDate();
         });
 
         // Update resolution date when custom days are entered
-        $('#days').on('input', function () {
+        $('#custom-days').on('input', function () {
             updateResolutionDate();
         });
 
