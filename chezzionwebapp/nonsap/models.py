@@ -9,6 +9,12 @@ STATUS_CHOICES = [
     ('inprogress', 'inprogress'),
     ('resolved', 'Resolved'),
 ]
+PRIORITY_CHOICES = [
+    ('P1', 'P1 - High'),
+    ('P2', 'P2 - Medium'),
+    ('P3', 'P3 - Low'),
+    ('P4', 'P4 - Custom'),
+]
 
 class IncidentIssue(models.Model):
     issue = models.CharField(max_length=255)
@@ -29,6 +35,11 @@ class IncidentIssue(models.Model):
          max_length=10,
          choices=STATUS_CHOICES,
          default='active',
+     )
+    priority = models.CharField(
+         max_length=10,
+         choices=PRIORITY_CHOICES,
+         default='P1',
      )
     
 

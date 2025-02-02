@@ -59,6 +59,17 @@
 
                 </td>
             </tr>
+            <tr>
+                <td><strong>Reported By</strong></td>
+                <td>{{ issue.reporter.username }}</td>
+            </tr>
+            <tr>
+                <td><strong>Root cause</strong></td>
+                <td>{% include 'admin/partials/rootcause_form.html' %}</td>
+            </tr>
+            <tr>
+                <td><strong>Priority</strong></td>
+                <td>{{ issue.priority }}</td>
         </tbody>
     </table>
 

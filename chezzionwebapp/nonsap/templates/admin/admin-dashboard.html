@@ -2,16 +2,14 @@
 
 {% block start %}
 {% if user.is_staff %}
-<div class="container">
-    <h4>Assigned Issues for <span class="text-bold">{{ user.username }}</span></h4>
+<div class="container text-center">
+    <h4>Welcome <span class="text-bold">{{ user.username }}</span></h4>
 
 
-    <h3>Admin Dashboard</h3>
-    {% for issue in assigned_issues %}
-    <p>{{ issue.issue }} (ID: {{ issue.id }})</p>
-    {% empty %}
-    <p>No assigned issues found.</p>
-    {% endfor %}
+    <p>
+        Your Role at Chezzion
+        As a Consultant, your role is crucial in helping us achieve our mission.
+    </p>
 </div>
 
 

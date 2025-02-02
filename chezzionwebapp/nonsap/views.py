@@ -452,10 +452,14 @@ def view_details(request, issue_id):
 
     # Fetch comments
     comments = issue.comments.all()
+# Pagination logic
+    paginator = Paginator(comments, 5)  # Show 5 comments per page
+    page_number = request.GET.get('page')  # Get the page number from the URL
+    page_obj = paginator.get_page(page_number)
 
     return render(
         request,
-        'master/view-details.html',
+        'admin/view-issue.html',
         {
             'issue': issue,
             'attachments': attachments,
@@ -615,3 +619,44 @@ def superadmin_login_view(request):
 
 
 
+
+
+def update_rootcause(request, issue_id):
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    if request.method == 'POST':
+        # Get the root cause from the form
+        root_cause = request.POST.get('rootcause')
+
+        # Update the root cause field in the database
+        issue.root_cause = root_cause
+        issue.save()
+
+        # Redirect to the issue details page or another page after update
+        return redirect('nonsap:view_details', issue_id=issue.id)
+
+    return render(request, 'admin/view-issue.html', {'issue': issue})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Issue
+
+def update_priority(request, issue_id):
+    # Get the issue object
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    if request.method == 'POST':
+        # Get the selected priority and resolution days
+        priority = request.POST.get('priority')
+        resolution_days = request.POST.get('days')
+
+        # Update the priority and resolution days in the database
+        issue.priority = priority
+        issue.resolution_days = resolution_days
+        issue.save()
+
+        # Redirect to the issue detail page or other relevant page
+        return redirect('nonsap:view_issue', issue_id=issue.id)
+
+    # If not POST, render the form with the current issue data
+    return render(request, 'issue_detail.html', {'issue': issue})
