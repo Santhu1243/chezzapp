@@ -50,18 +50,14 @@ class CommentForm(forms.ModelForm):
 
 
 
-    def save(self, incident, user, commit=True):
-        """
-        Save the form data to the database, associating it with an incident and user.
-        """
-        comment_instance = Comment(
-            comment_text=self.cleaned_data['comment_text'],
-            incident=incident,  
-            user=user           
-        )
-        if commit:
-            comment_instance.save()
-        return comment_instance
+def save(self, commit=True):
+    comment_instance = super().save(commit=False)  # Create the comment instance without saving to DB
+    if commit:
+        comment_instance.save()  # Save the instance to the database
+        self.save_m2m()  # Save any many-to-many relationships (if any)
+    return comment_instance
+
+
 
 # Staff Login Form
 class StaffLoginForm(forms.Form):

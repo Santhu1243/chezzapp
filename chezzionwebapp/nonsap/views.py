@@ -250,34 +250,29 @@ def dashboard_view(request):
 
 @login_required
 def view_status(request, issue_id):
-    # Fetch the issue object based on the issue_id
+    # Fetch the issue object
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
-    # Fetch the attachments related to the issue (assuming a related name "attachments")
+    # Fetch attachments
     attachments = issue.attachments.all()
 
-    # Handle the comment form submission
+    # Handle form submission
     if request.method == "POST":
         form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
-            # Create a new comment instance
-            comment = Comment(
-                comment_text=form.cleaned_data['comment_text'], 
-                issue=issue,
-                commented_by=request.user
-            )
-            comment.save()
-            print(comment.image)
-
-        else:
-            print(form.errors) 
-            # Redirect to avoid re-submission on refresh
-            # return redirect('nonsap:view_status', issue_id=issue.id)
+            comment = form.save(commit=False)  # Create comment instance without saving
+            comment.issue = issue  # Assign issue
+            comment.commented_by = request.user  # Assign user
+            comment.save()  # Save to database
     else:
         form = CommentForm()
 
-    # Fetch the comments related to the issue (assuming a related name "comments")
+    # Fetch comments
     comments = issue.comments.all()
+    # Pagination logic
+    paginator = Paginator(comments, 5)  # Show 5 comments per page
+    page_number = request.GET.get('page')  # Get the page number from the URL
+    page_obj = paginator.get_page(page_number)
 
     return render(
         request,
@@ -438,31 +433,67 @@ from .forms import CommentForm
 
 @login_required
 def view_details(request, issue_id):
-    # Fetch the issue object based on the issue_id
+    # Fetch the issue object
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
-    # Fetch the attachments related to the issue (assuming a related name "attachments")
+    # Fetch attachments
     attachments = issue.attachments.all()
 
-    # Handle the comment form submission
+    # Handle form submission
     if request.method == "POST":
-        form = CommentForm(request.POST, request.FILES)  # Include FILES for image upload
+        form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
-            # Create a new comment instance
-            comment = form.save(commit=False)  # Don't save yet
-            comment.issue = issue  # Associate the comment with the issue
-            comment.commented_by = request.user  # Associate the comment with the logged-in user
-            comment.save()  # Now save the comment
-            return redirect('view_details', issue_id=issue.id)  # Redirect to the same page after posting
+            comment = form.save(commit=False)  # Create comment instance without saving
+            comment.issue = issue  # Assign issue
+            comment.commented_by = request.user  # Assign user
+            comment.save()  # Save to database
     else:
         form = CommentForm()
 
-    # Fetch the comments related to the issue (assuming a related name "comments")
+    # Fetch comments
     comments = issue.comments.all()
 
     return render(
         request,
-        'incident-management/issue-status.html',
+        'master/view-details.html',
+        {
+            'issue': issue,
+            'attachments': attachments,
+            'form': form,
+            'comments': comments,
+        }
+    )
+
+
+@login_required
+def view_issue(request, issue_id):
+    # Fetch the issue object
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    # Fetch attachments
+    attachments = issue.attachments.all()
+
+    # Handle form submission
+    if request.method == "POST":
+        form = CommentForm(request.POST, request.FILES)
+        if form.is_valid():
+            comment = form.save(commit=False)  # Create comment instance without saving
+            comment.issue = issue  # Assign issue
+            comment.commented_by = request.user  # Assign user
+            comment.save()  # Save to database
+    else:
+        form = CommentForm()
+
+    # Fetch comments
+    comments = issue.comments.all()
+# Pagination logic
+    paginator = Paginator(comments, 5)  # Show 5 comments per page
+    page_number = request.GET.get('page')  # Get the page number from the URL
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'master/view-details.html',
         {
             'issue': issue,
             'attachments': attachments,
@@ -581,3 +612,6 @@ def superadmin_login_view(request):
         form = SuperAdminLoginForm()
 
     return render(request, 'registration/superadmin_login.html', {'form': form})
+
+
+

@@ -1,7 +1,7 @@
 <div class="col-md-6 col-sm-12 mx-auto comment-box">
     <div class="comments-section">
         <h3>Messages</h3>
-        <ul class="comments-list">
+        <ul class="comments-list" id="comments-list">
             {% for comment in comments %}
             <li
                 class="comment-item {% if comment.commented_by.is_superuser %}superuser{% elif comment.commented_by.is_staff %}staff{% else %}regular-user{% endif %}">
@@ -9,17 +9,17 @@
                     {% if comment.commented_by.is_superuser %}
                     <span class="user-badge superuser-badge" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-title="{{ comment.commented_by }}">
-                        <i class="fa-solid fa-user-tie"></i>
+                        {{ comment.commented_by.username|first|upper }}
                     </span>
                     {% elif comment.commented_by.is_staff %}
                     <span class="user-badge staff-badge" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-title="{{ comment.commented_by }}">
-                        <i class="fa-solid fa-user-tie"></i>
+                        {{ comment.commented_by.username|first|upper }}
                     </span>
                     {% else %}
                     <span class="user-badge regular-badge" data-bs-toggle="tooltip" data-bs-placement="left"
                         data-bs-title="{{ comment.commented_by }}">
-                        <i class="fa-solid fa-user"></i>
+                        {{ comment.commented_by.username|first|upper }}
                     </span>
                     {% endif %}
                 </strong>
@@ -29,22 +29,21 @@
                 {% if comment.image %}
                 <div class="comment-image">
                     <img src="{{ comment.image.url }}" alt="Comment Image"
-                        style="max-width: 100px; height: auto; border-radius: 5px;">
+                        style="max-width: 100px; height: auto; border-radius: 5px;" class="img-thumbnail"
+                        data-bs-toggle="modal" data-bs-target="#imageModal"
+                        onclick="openModal('{{ comment.image.url }}')">
                 </div>
                 {% endif %}
-
             </li>
-            {% empty %}
-            <li class="no-comments">No comments yet. Be the first to comment!</li>
             {% endfor %}
         </ul>
 
-
+        <!-- Pagination (outside the for loop) -->
+        {% include 'incident-management/partials/pagination.html' %}
     </div>
 
-
-
-    <form method="post" enctype="multipart/form-data" class="mt-4">
+    <!-- Comment Form -->
+    <form method="post" enctype="multipart/form-data" id="comment-form" class="mt-4">
         {% csrf_token %}
 
         <!-- Comment Text Input -->
@@ -55,19 +54,72 @@
 
         <!-- Image Upload Input -->
         <div class="mb-3">
-            <label for="id_image" class="form-label">Upload Image:</label>
-            <input type="file" name="image" id="id_image" class="form-control">
+            <input type="file" name="image" id="id_image" class="form-control" placeholder="Upload Image">
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">Add Message</button>
+        <button type="submit" class="btn btn-primary">Send Message</button>
     </form>
-
-
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" class="img-fluid" alt="Image">
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    function openModal(imageUrl) {
+        // Set the source of the modal image
+        document.getElementById('modalImage').src = imageUrl;
+    }
+
+    // Handle form submission via AJAX
+    document.getElementById("comment-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        let formData = new FormData(this);  // Create FormData object to send the form data (including file)
+
+        // Use AJAX to submit the form
+        fetch("{% url 'nonsap:view_issue' %}", { // Replace 'your_view_name' with the actual URL name of your view
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Add the new comment to the comments list
+                let commentHTML = `
+                <li class="comment-item">
+                    <strong class="comment-user">${data.commented_by}</strong>
+                    <span class="comment-text">${data.comment_text}</span>
+                    <span class="comment-time">${data.created_at}</span>
+                    ${data.image ? `<div class="comment-image"><img src="${data.image_url}" alt="Comment Image" class="img-thumbnail"></div>` : ''}
+                </li>
+            `;
+                document.getElementById("comments-list").innerHTML = commentHTML + document.getElementById("comments-list").innerHTML; // Prepend the new comment
+                document.getElementById("comment-form").reset();  // Reset the form
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 </script>

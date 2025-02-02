@@ -118,7 +118,61 @@
         });
     </script>
 
+    <script>
+        let sortDirection = {};
 
+        function sortTable(columnIndex, tableId) {
+            let table = document.getElementById(tableId);
+            let tbody = table.querySelector("tbody");
+            let rows = Array.from(tbody.querySelectorAll("tr"));
+
+            // Initialize sort direction if not set
+            if (sortDirection[columnIndex] === undefined) {
+                sortDirection[columnIndex] = true;  // Ascending by default
+            } else {
+                sortDirection[columnIndex] = !sortDirection[columnIndex];  // Toggle direction
+            }
+
+            rows.sort((rowA, rowB) => {
+                let cellA = rowA.cells[columnIndex].textContent.trim();
+                let cellB = rowB.cells[columnIndex].textContent.trim();
+
+                // Convert numbers for correct sorting
+                let isNumeric = !isNaN(cellA) && !isNaN(cellB);
+                if (isNumeric) {
+                    return sortDirection[columnIndex] ? cellA - cellB : cellB - cellA;
+                }
+
+                return sortDirection[columnIndex] ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            });
+
+            // Append sorted rows back to tbody
+            tbody.innerHTML = "";
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Update sort icons
+            updateSortIcons(columnIndex, tableId);
+        }
+
+        function updateSortIcons(columnIndex, tableId) {
+            // Reset all icons
+            for (let i = 0; i < 5; i++) {
+                let icon = document.getElementById("sort-icon-" + i);
+                icon.classList.remove("fa-arrow-up", "fa-arrow-down");
+                icon.classList.add("fa-sort");  // Add default sort icon
+            }
+
+            // Update the icon based on the sort direction
+            let icon = document.getElementById("sort-icon-" + columnIndex);
+            if (sortDirection[columnIndex]) {
+                icon.classList.remove("fa-sort");
+                icon.classList.add("fa-arrow-up");
+            } else {
+                icon.classList.remove("fa-sort");
+                icon.classList.add("fa-arrow-down");
+            }
+        }
+    </script>
 
 </body>
 

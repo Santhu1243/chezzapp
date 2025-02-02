@@ -1,1 +1,8 @@
 venv/
+
+chezzionwebapp/chezzionwebapp/settings.py
+
+# Ignore compiled Python files
+chezzionwebapp/chezzionwebapp/__pycache__/
+*.pyc
+*.pyo

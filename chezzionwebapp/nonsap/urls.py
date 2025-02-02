@@ -24,6 +24,7 @@ urlpatterns = [
     path('staff-admin/view-assigned/', views.assigned_complaints, name='assigned_complaints'),
     path('incident-management/view-status/<int:issue_id>/', views.view_status, name='view_status'),
     path('superuser/', views.superadmin_dashboard, name='superadmin_dashboard'),
+    path('superuser/view-issue/<int:issue_id>/', views.view_issue, name='view_issue'),
     path('assign-staff/<int:issue_id>/', views.assign_staff, name='assign_staff'),
     path('staff-admin/viewdetails/<int:issue_id>/', views.view_details, name='view_details'),
     path('update-status/<int:issue_id>/', views.update_status, name='update_status'),

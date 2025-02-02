@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "superuser-base.html" %}
 
 {% block start %}
 <div class="container mt-5">
@@ -13,7 +13,11 @@
         </thead>
         <tbody>
             <tr>
-                <td><strong>Issue title</strong></td>
+                <td><strong>Custom Id</strong></td>
+                <td><strong class="highlight">{{ issue.custom_id }}</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Issue Title</strong></td>
                 <td>{{ issue.issue }}</td>
             </tr>
             <tr>
@@ -31,8 +35,8 @@
             <tr>
                 <td><strong>Assigned to</strong></td>
                 <td>
-                    {% if issue.assigned_staff %}
-                    {{ issue.assigned_staff.username }}
+                    {% if issue.assigned_to %}
+                    {{ issue.assigned_to.username }}
                     {% else %}
                     Not Assigned
                     {% endif %}
@@ -58,38 +62,9 @@
         </tbody>
     </table>
 
-    <h2 class="mt-5">Attachments</h2>
-    {% if attachments %}
-    <p>Attachments available:</p>
-    <ul>
-        {% for attachment in attachments %}
-        <li>{{ attachment.file.name }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No attachments available.</p>
-    {% endif %}
+    {% include 'incident-management/partials/attachments.html' %}
 
-    <ul>
-        {% for attachment in attachments %}
-        <li><a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name }}</a></li>
-        {% endfor %}
-    </ul>
-
-    <h2 class="mt-5">Comments</h2>
-    <ul>
-        {% for comment in comments %}
-        <li><strong>{{ comment.commented_by.username }}</strong>: {{ comment.comment }}</li>
-        {% empty %}
-        <li>No comments yet.</li>
-        {% endfor %}
-    </ul>
-
-    <form method="post" class="mt-4">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Add Comment</button>
-    </form>
+    {% include 'incident-management/partials/comments.html' %}
 
     {% else %}
     <p>Please log in to view issue details.</p>
