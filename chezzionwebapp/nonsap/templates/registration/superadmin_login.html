@@ -1,41 +1,57 @@
 {% extends "superuser-base.html" %}
 {% block start %}
 {% load static %}
-<div class="container-fluid ">
+<div class="container-fluid">
     <div class="row login-wrapper justify-content-center">
         <div class="container text-center mt-3">
             <p class="fw-bold bg-dark text-white p-3 rounded">Super Admin</p>
         </div>
-        <div class="row justify-conter-center align-items-center">
+        <div class="row justify-content-center align-items-center">
             <div class="col-md-6 col-sm-12">
                 <div class="container form-box">
                     <h3 class="text-center text-primary">Log In</h3>
+
+                    <!-- Show General Form Errors -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
                     <form action="" method="post" id="login-form">
                         {% csrf_token %}
-                        <!-- {{form}} -->
-                        <!-- General Errors -->
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors|striptags }}
-                        </div>
-                        {% endif %}
 
                         <div class="form-group">
-                            <label for="username" class="form-label">Username</label>
+                            <label for="id_username" class="form-label">Username</label>
                             <input type="text" name="username" id="id_username" class="form-control"
-                                value="{{ form.username.value|default:'' }}">
+                                value="{{ form.username.value|default:'' }}" aria-label="Username">
                             {% if form.username.errors %}
-                            <div class="text-danger">{{ form.username.errors|striptags }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="form-group">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="id_password" class="form-control">
-                            {% if form.password.errors %}
-                            <div class="text-danger">{{ form.password.errors|striptags }}</div>
+                            <div class="text-danger">
+                                {% for error in form.username.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
                             {% endif %}
                         </div>
 
+                        <div class="form-group">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" name="password" id="id_password" class="form-control"
+                                aria-label="Password">
+                            {% if form.password.errors %}
+                            <div class="text-danger">
+                                {% for error in form.password.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
 
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary mt-3" type="submit">Login</button>
@@ -43,8 +59,9 @@
                     </form>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
-                <img src="{% static 'assets/img/logo-icon.png' %}" alt="chezzion" class="img-fluid rotate-img mt-3">
+            <div class="col-md-6 col-sm-12 text-center">
+                <img src="{% static 'assets/img/logo-icon.png' %}" alt="Chezzion Logo"
+                    class="img-fluid rotate-img mt-3">
             </div>
         </div>
     </div>

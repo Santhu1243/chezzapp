@@ -1,7 +1,7 @@
 <div class="col-md-6 col-sm-12 mx-auto comment-box">
     <div class="comments-section">
         <h3>Messages</h3>
-        <ul class="comments-list" id="comments-list">
+        <ul class="comments-list">
             {% for comment in comments %}
             <li
                 class="comment-item {% if comment.commented_by.is_superuser %}superuser{% elif comment.commented_by.is_staff %}staff{% else %}regular-user{% endif %}">
@@ -12,7 +12,7 @@
                         {{ comment.commented_by.username|first|upper }}
                     </span>
                     {% elif comment.commented_by.is_staff %}
-                    <span class="user-badge staff-badge" data-bs-toggle="tooltip" data-bs-placement="right"
+                    <span class=" user-badge staff-badge" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-title="{{ comment.commented_by }}">
                         {{ comment.commented_by.username|first|upper }}
                     </span>
@@ -34,16 +34,21 @@
                         onclick="openModal('{{ comment.image.url }}')">
                 </div>
                 {% endif %}
+
+
             </li>
+            {% include 'incident-management/partials/pagination.html' %}
+            {% empty %}
+            <li class="no-comments p-2">No comments yet. Be the first to comment!</li>
             {% endfor %}
         </ul>
 
-        <!-- Pagination (outside the for loop) -->
-        {% include 'incident-management/partials/pagination.html' %}
+
     </div>
 
-    <!-- Comment Form -->
-    <form method="post" enctype="multipart/form-data" id="comment-form" class="mt-4">
+
+
+    <form method="post" enctype="multipart/form-data" class="mt-4">
         {% csrf_token %}
 
         <!-- Comment Text Input -->
@@ -60,8 +65,9 @@
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Send Message</button>
     </form>
-</div>
 
+
+</div>
 <!-- Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -76,44 +82,13 @@
         </div>
     </div>
 </div>
-
 <script>
     function openModal(imageUrl) {
         // Set the source of the modal image
         document.getElementById('modalImage').src = imageUrl;
     }
-
-    // Handle form submission via AJAX
-    document.getElementById("comment-form").addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        let formData = new FormData(this);  // Create FormData object to send the form data (including file)
-
-        // Use AJAX to submit the form
-        fetch("{% url 'nonsap:view_issue' %}", { // Replace 'your_view_name' with the actual URL name of your view
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Add the new comment to the comments list
-                let commentHTML = `
-                <li class="comment-item">
-                    <strong class="comment-user">${data.commented_by}</strong>
-                    <span class="comment-text">${data.comment_text}</span>
-                    <span class="comment-time">${data.created_at}</span>
-                    ${data.image ? `<div class="comment-image"><img src="${data.image_url}" alt="Comment Image" class="img-thumbnail"></div>` : ''}
-                </li>
-            `;
-                document.getElementById("comments-list").innerHTML = commentHTML + document.getElementById("comments-list").innerHTML; // Prepend the new comment
-                document.getElementById("comment-form").reset();  // Reset the form
-            })
-            .catch(error => console.error('Error:', error));
-    });
 </script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
