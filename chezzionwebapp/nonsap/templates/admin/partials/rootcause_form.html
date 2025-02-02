@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'nonsap:update_rootcause' issue.id %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <textarea name="rootcause" id="rootcause" class="form-lg-control w-100"
+            rows="4">{{ issue.root_cause }}</textarea>
+    </div>
+    <div class="text-start">
+        <button type="submit" class="btn btn-primary">Update Root Cause</button>
+    </div>
+</form>

@@ -59,6 +59,14 @@
 
                 </td>
             </tr>
+            <tr>
+                <td><strong>Root Cause</strong></td>
+                <td>{{ issue.root_cause }}</td>
+            </tr>
+            <tr>
+                <td><strong>Priority</strong></td>
+                <td>{% include 'master/partials/priority_form.html' %}</td>
+            </tr>
         </tbody>
     </table>
 

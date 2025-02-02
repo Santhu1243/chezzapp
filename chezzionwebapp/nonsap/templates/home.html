@@ -2,8 +2,22 @@
 {% block start %}
 {% if request.user.is_authenticated %}
 <h2 class="text-center text-primary mt-5">
-    Welcome, {{ request.user.username }}
+    Hi, {{ request.user.username }}
 </h2>
+<div class="container text-center p-5">
+    <h3>Welcome to the Incident Management & Complaint Raise Portal</h3>
+    <h6>Efficient Issue Resolution for All Users</h6>
+
+    <p> At Chezzion, we value the quality of service we provide to our customers and employees. Our Incident
+        Management Portal is designed to ensure that any issues or complaints are addressed quickly and efficiently.
+
+        Whether you're facing a technical issue, a service-related problem, or any other type of complaint, we are here
+        to help.
+        Through this portal, you can easily raise and track your complaints, ensuring you are always in the loop about
+        the
+        resolution process.</p>
+    <a href="{% url 'nonsap:dashboard' %}" class="btn btn-secondary"> Go to Dashboard </a>
+</div>
 {% else %}
 <h2 class="text-center text-danger mt-5">
     Login
