@@ -37,7 +37,8 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('update_rootcause/<int:issue_id>/', views.update_rootcause, name='update_rootcause'),
     path('update_priority/<int:issue_id>/', views.update_priority, name='update_priority'),
-
+    path('profile/', views.profile_page, name='profile_page'),
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

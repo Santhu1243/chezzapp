@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Chezzion Web app{% endblock %}</title>
     {% load static %}
+    {% load tz %}
     <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo-icon.png' %}">
     <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="shortcut icon" href="{% static 'assets/img/fav-icon.png' %}" type="image/x-icon">
@@ -110,7 +111,10 @@
             var currentDate = new Date();
             $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB')); // Formats the date to dd/mm/yyyy
             $('#reportdatepicker').datepicker({
-                autoclose: true
+                autoclose: true,
+                todayHighlight: true,
+                format: 'yyyy-mm-dd',
+                startDate: currentDate,
             });
 
             // Get the current time

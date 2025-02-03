@@ -1,0 +1,38 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>User Profile</h2>
+
+    <div class="card p-3">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                {% if request.user.userprofile.profile_picture %}
+                <img src="{{ request.user.userprofile.profile_picture.url }}" alt="Profile Picture"
+                    class="rounded-circle img-thumbnail" width="150">
+                {% else %}
+                <img src="https://via.placeholder.com/150" alt="Default Profile Picture"
+                    class="rounded-circle img-thumbnail">
+                {% endif %}
+                <form method="POST" enctype="multipart/form-data" action="{% url 'update_profile_picture' %}">
+                    {% csrf_token %}
+                    <input type="file" name="profile_picture" class="form-control mt-2">
+                    <button type="submit" class="btn btn-primary btn-sm mt-2">Update Picture</button>
+                </form>
+            </div>
+
+            <div class="col-md-8">
+                <p><strong>Username:</strong> {{ request.user.username }}</p>
+                <p><strong>Email:</strong> {{ request.user.email }}</p>
+                <p><strong>Company Name:</strong> {{ request.user.userprofile.company_name }}</p>
+                <p><strong>Joined:</strong> {{ request.user.date_joined }}</p>
+
+                <a href="{% url 'edit_profile' %}" class="btn btn-warning btn-sm">Edit Profile</a>
+                <a href="{% url 'password_change' %}" class="btn btn-danger btn-sm">Change Password</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

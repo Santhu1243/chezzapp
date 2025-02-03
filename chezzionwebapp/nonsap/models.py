@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django import forms
 from django.utils import timezone
-
 # Define STATUS_CHOICES before referencing it in the model
 STATUS_CHOICES = [
     ('active', 'Active'),
@@ -114,4 +113,7 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.file.name
+
+
+
 

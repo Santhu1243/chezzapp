@@ -26,7 +26,7 @@ from django.shortcuts import render
 from django.db.models import F
 from .forms import StaffLoginForm, SuperAdminLoginForm
 from django.shortcuts import redirect
-
+from django.contrib.auth.models import Group
 
 # Home view
 @login_required
@@ -172,7 +172,7 @@ def raise_issue(request):
             try:
                 send_mail(
                     'Issue Reported Successfully',
-                    f'Your issue "{incident_issue.issue}" has been successfully reported.',
+                    f'Your issue "{incident_issue.issue}" has been successfully reported. We will send you an email once it is resolved.',
                     settings.DEFAULT_FROM_EMAIL,
                     [request.user.email],
                     fail_silently=False,
@@ -187,7 +187,7 @@ def raise_issue(request):
             try:
                 send_mail(
                     'New Issue Reported',
-                    f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}.',
+                    f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}. Complaint Number:  {incident_issue.reporter.custom_id}',
                     settings.DEFAULT_FROM_EMAIL,
                     superadmin_emails,  # Send to all superadmins at once
                     fail_silently=False,
@@ -250,56 +250,6 @@ def dashboard_view(request):
 
 
 
-@login_required
-def view_status(request, issue_id):
-    # Fetch the issue object
-    issue = get_object_or_404(IncidentIssue, id=issue_id)
-
-    # Fetch attachments
-    attachments = issue.attachments.all()
-
-    # Handle form submission
-    if request.method == "POST":
-        form = CommentForm(request.POST, request.FILES)
-        if form.is_valid():
-            comment = form.save(commit=False)  # Create comment instance without saving
-            comment.issue = issue  # Assign issue
-            comment.commented_by = request.user  # Assign user
-            comment.save()  # Save to database
-    else:
-        form = CommentForm()
-
-    # Fetch comments
-    comments = issue.comments.all()
-    # Pagination logic
-    paginator = Paginator(comments, 5)  # Show 5 comments per page
-    page_number = request.GET.get('page')  # Get the page number from the URL
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'incident-management/issue-status.html',
-        {
-            'issue': issue,
-            'attachments': attachments,
-            'form': form,
-            'comments': comments,
-        }
-    )
-
-def issue_details(request, issue_id):
-    issue = Issue.objects.get(id=issue_id)
-    attachments = Attachment.objects.filter(issue=issue)
-    comments = Comment.objects.filter(issue=issue)
-    form = CommentForm(request.POST or None)
-    
-    return render(request, 'issue-status.html', {
-        'issue': issue,
-        'attachments': attachments,
-        'comments': comments,
-        'form': form
-    })
-
 
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
@@ -310,8 +260,13 @@ def superadmin_dashboard(request):
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
         status_choices = Issue._meta.get_field('status').choices
 
+        # Pagination logic
+        paginator = Paginator(issues, 10)  # Show 10 issues per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         context = {
-            'issues': issues,
+            'issues': page_obj,
             'staff_members': staff_members,
             'status_choices': status_choices,
         }
@@ -361,46 +316,70 @@ def assign_issue(request, issue_id):
 
 
 
-def assign_staff(request, issue_id):
-    issue = IncidentIssue.objects.get(id=issue_id)
-    
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import IncidentIssue, User
+
+@login_required
+def assign_staff(request, issue_id):  # sourcery skip: use-named-expression
+    try:
+        issue = IncidentIssue.objects.get(id=issue_id)
+    except IncidentIssue.DoesNotExist:
+        messages.error(request, 'Issue not found.')
+        return redirect('nonsap:superadmin_dashboard')
+
     if request.method == 'POST':
         staff_id = request.POST.get('staff_id')
         if staff_id:
-            staff = User.objects.get(id=staff_id)
-            issue.assigned_to = staff
-            issue.save()
-            
-            # Sending Email to Staff Member
-            staff_subject = 'New Complaint Assigned to You'
-            staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.id}). Please take appropriate action.'
-            send_mail(
-                staff_subject,
-                staff_message,
-                settings.DEFAULT_FROM_EMAIL,  
-                [staff.email],
-                fail_silently=False,
-            )
+            try:
+                staff = User.objects.get(id=staff_id, is_staff=True)
+                assign_staff_to_issue(staff, issue)  # Assign staff to the issue
+                issue.save()
 
-            # Sending Email to User (Reporter)
-            user_subject = 'Your Complaint has been Assigned to Staff'
-            user_message = f'Hello {issue.reporter.username},\n\nYour complaint CHEZ-ISSUE-{issue.id} has been successfully assigned to {staff.username}. They will reach out to you soon.'
-            send_mail(
-                user_subject,
-                user_message,
-                settings.DEFAULT_FROM_EMAIL,  
-                [issue.reporter.email],
-                fail_silently=False,
-            )
-            
-            return redirect('nonsap:superadmin_dashboard')  # Ensure the correct redirect
+                # Sending Email to Staff Member
+                staff_subject = 'New Complaint Assigned to You'
+                staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.custom_id}). Please take appropriate action.'
+                send_mail(
+                    staff_subject,
+                    staff_message,
+                    settings.DEFAULT_FROM_EMAIL,  
+                    [staff.email],
+                    fail_silently=False,
+                )
+
+                # Sending Email to User (Reporter)
+                user_subject = 'Your Complaint has been Assigned to Staff'
+                user_message = f'Hello {issue.reporter.username},\n\nYour complaint {issue.custom_id} has been successfully assigned to {staff.username}. They will reach out to you soon.'
+                send_mail(
+                    user_subject,
+                    user_message,
+                    settings.DEFAULT_FROM_EMAIL,  
+                    [issue.reporter.email],
+                    fail_silently=False,
+                )
+
+                messages.success(request, f'Complaint {issue.custom_id} has been successfully assigned to {staff.username}.')
+                return redirect('nonsap:superadmin_dashboard')
+
+            except User.DoesNotExist:
+                messages.error(request, 'Selected staff member not found.')
+                return redirect('nonsap:assign_staff', issue_id=issue_id)
         else:
-            # Handle case where staff_id is not provided
-            return redirect('nonsap:assign_staff', issue_id=issue_id)  # Redirect back with error
+            messages.error(request, 'Please select a staff member to assign the complaint.')
+            return redirect('nonsap:assign_staff', issue_id=issue_id)
 
-    # Get all staff members for the assignment form
     staff_members = User.objects.filter(is_staff=True)
     return render(request, 'master/assign_staff.html', {'issue': issue, 'staff_members': staff_members})
+
+
+def assign_staff_to_issue(staff, issue):
+    # Assign the staff member to the issue
+    issue.assigned_to = staff  # Assuming you have an 'assigned_to' field in your model
+    issue.save()
+
 
 
 
@@ -432,81 +411,65 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import IncidentIssue, Comment
 from .forms import CommentForm
+from django.core.paginator import Paginator
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+def common_view(request, issue_id, template_name):
+    # Fetch the issue object
+    issue = get_object_or_404(IncidentIssue, id=issue_id)
+
+    # Fetch attachments
+    attachments = issue.attachments.all()
+
+    # Handle form submission
+    if request.method == "POST":
+        form = CommentForm(request.POST, request.FILES)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.issue = issue
+            comment.commented_by = request.user
+            
+            if form.cleaned_data.get('comment_text') or form.cleaned_data.get('image'):
+                comment.save()
+        else:
+            print("Form errors:", form.errors)  # Log errors here if necessary
+        
+    else:
+        form = CommentForm()
+
+    # Fetch comments
+    comments = issue.comments.all()
+
+    # Pagination logic
+    paginator = Paginator(comments, 5)  # Show 5 comments per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        template_name,
+        {
+            'issue': issue,
+            'attachments': attachments,
+            'form': form,
+            'comments': comments,
+            'page_obj': page_obj,  # Include paginated comments
+        }
+    )
 
 @login_required
 def view_details(request, issue_id):
-    # Fetch the issue object
-    issue = get_object_or_404(IncidentIssue, id=issue_id)
-
-    # Fetch attachments
-    attachments = issue.attachments.all()
-
-    # Handle form submission
-    if request.method == "POST":
-        form = CommentForm(request.POST, request.FILES)
-        if form.is_valid():
-            comment = form.save(commit=False)  # Create comment instance without saving
-            comment.issue = issue  # Assign issue
-            comment.commented_by = request.user  # Assign user
-            comment.save()  # Save to database
-    else:
-        form = CommentForm()
-
-    # Fetch comments
-    comments = issue.comments.all()
-# Pagination logic
-    paginator = Paginator(comments, 5)  # Show 5 comments per page
-    page_number = request.GET.get('page')  # Get the page number from the URL
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'admin/view-issue.html',
-        {
-            'issue': issue,
-            'attachments': attachments,
-            'form': form,
-            'comments': comments,
-        }
-    )
-
+    return common_view(request, issue_id, 'admin/view-issue.html')
 
 @login_required
 def view_issue(request, issue_id):
-    # Fetch the issue object
-    issue = get_object_or_404(IncidentIssue, id=issue_id)
+    return common_view(request, issue_id, 'master/view-details.html')
 
-    # Fetch attachments
-    attachments = issue.attachments.all()
+@login_required
+def view_status(request, issue_id):
+    return common_view(request, issue_id, 'incident-management/issue-status.html')
 
-    # Handle form submission
-    if request.method == "POST":
-        form = CommentForm(request.POST, request.FILES)
-        if form.is_valid():
-            comment = form.save(commit=False)  # Create comment instance without saving
-            comment.issue = issue  # Assign issue
-            comment.commented_by = request.user  # Assign user
-            comment.save()  # Save to database
-    else:
-        form = CommentForm()
-
-    # Fetch comments
-    comments = issue.comments.all()
-# Pagination logic
-    paginator = Paginator(comments, 5)  # Show 5 comments per page
-    page_number = request.GET.get('page')  # Get the page number from the URL
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'master/view-details.html',
-        {
-            'issue': issue,
-            'attachments': attachments,
-            'form': form,
-            'comments': comments,
-        }
-    )
 
 
 
@@ -565,7 +528,7 @@ def send_status_change_email(issue, old_status, new_status):
     # Send email to the assigned staff if the staff has been assigned
     if issue.assigned_to:
         send_mail(
-            f'New Issue Assigned to You: #{issue.id}',
+            f'New Issue Assigned to You: #{issue.custom_id}',
             f'You have been assigned to the issue "{issue.issue}". The status is now "{new_status}".',
             settings.DEFAULT_FROM_EMAIL,
             [issue.assigned_to.email],
@@ -683,3 +646,25 @@ def get_user_group(self):
     return self.groups.first().name if self.groups.exists() else ""
 
 User.add_to_class("group_name", property(get_user_group))
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile_page(request):
+    user = request.user
+
+    # Determine which base template to use
+    if user.is_superuser:
+        base_template = "superuser-base.html"
+    elif user.is_staff:
+        base_template = "admin-base.html"
+    else:
+        base_template = "base.html"
+
+    # Get user's groups
+    groups = user.groups.all()
+
+    return render(request, "account/profile.html", {"user": request.user})
+

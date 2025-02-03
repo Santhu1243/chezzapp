@@ -18,7 +18,7 @@ class IncidentIssueForm(forms.ModelForm):
         model = IncidentIssue
         fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'reporter']
 
-    def clean_reporter(self):
+    def clean_reporter(self):  # sourcery skip: raise-from-previous-error
         """ Custom validation for the reporter field. """
         reporter_username = self.cleaned_data.get('reporter')
         if not reporter_username:
@@ -36,22 +36,29 @@ class IncidentIssueForm(forms.ModelForm):
         return instance
 
 
+
+
 class CommentForm(forms.ModelForm):
     comment_text = forms.CharField(
+        required=False,  # Make comment text optional
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 3})
     )
-    image = forms.ImageField(required=False, widget=forms.FileInput(attrs={"class": "form-control"}))
+    image = forms.ImageField(
+        required=False,  # Make image optional
+        widget=forms.FileInput(attrs={"class": "form-control"})
+    )
 
     class Meta:
         model = Comment
-        fields = ["comment_text", "image"]
+        fields = ["comment_text", "image"]  # Allow both comment and image
 
     def save(self, commit=True):
+        # Save the comment instance
         comment_instance = super().save(commit=False)
         if commit:
-            comment_instance.save()
-            self.save_m2m()
+            comment_instance.save()  # Save to the database
         return comment_instance
+
 
 
 # Staff Login Form
