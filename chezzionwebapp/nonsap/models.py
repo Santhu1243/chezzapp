@@ -38,8 +38,8 @@ class IncidentIssue(models.Model):
      )
     priority = models.CharField(
          max_length=10,
-         choices=PRIORITY_CHOICES,
-         default='P1',
+         choices=STATUS_CHOICES,
+         default='active',
      )
     
 

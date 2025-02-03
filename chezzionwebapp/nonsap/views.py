@@ -33,7 +33,7 @@ from django.shortcuts import redirect
 def home(request):
     return render(request, 'home.html')
 
-# Welcome view
+
 @login_required
 def welcome_view(request):
     return render(request, 'home.html', {'username': request.user.username})
@@ -168,7 +168,7 @@ def raise_issue(request):
                     uploaded_at=now()
                 )
 
-            # Send email notifications (unchanged)
+            # Send email notification to the reporter
             try:
                 send_mail(
                     'Issue Reported Successfully',
@@ -180,18 +180,20 @@ def raise_issue(request):
             except Exception as e:
                 print(f"Error sending email to reporter: {e}")
 
+            # Get emails of all superadmins and send one email to all of them
             superadmins = User.objects.filter(is_superuser=True)
-            for admin in superadmins:
-                try:
-                    send_mail(
-                        'New Issue Reported',
-                        f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}.',
-                        settings.DEFAULT_FROM_EMAIL,
-                        [admin.email],
-                        fail_silently=False,
-                    )
-                except Exception as e:
-                    print(f"Error sending email to superadmin {admin.username}: {e}")
+            superadmin_emails = [admin.email for admin in superadmins]
+
+            try:
+                send_mail(
+                    'New Issue Reported',
+                    f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    superadmin_emails,  # Send to all superadmins at once
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Error sending email to superadmins: {e}")
 
             # Success message and redirect
             messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
@@ -554,7 +556,7 @@ def send_status_change_email(issue, old_status, new_status):
     # Send email to the user (reporter)
     send_mail(
         f'Issue #{issue.id} Status Changed',
-        f'Your issue "{issue.issue}" has been updated from "{old_status}" to "{new_status}".',
+        f'Your issue "{issue.issue}" with complaint id : "{issue.custom_id}" has been updated from "{old_status}" to "{new_status}".',
         settings.DEFAULT_FROM_EMAIL,
         [issue.reporter.email],
         fail_silently=False,
@@ -660,3 +662,18 @@ def update_priority(request, issue_id):
 
     # If not POST, render the form with the current issue data
     return render(request, 'issue_detail.html', {'issue': issue})
+
+
+
+
+
+
+@login_required
+def user_redirect(request):
+    if request.user.is_superuser:
+        return redirect('nonsap:superadmin_dashboard')
+    elif request.user.is_staff:
+        return redirect('nonsap:admin-dashboard')
+    else:
+        return redirect('nonsap:home')
+

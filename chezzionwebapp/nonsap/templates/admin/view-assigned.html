@@ -2,6 +2,9 @@
 
 {% block start %}
 {% if user.is_staff %}
+
+
+<!-- Table -->
 <div class="container">
     <h4>Assigned Issues for <span class="text-bold">{{ user.username }}</span></h4>
 
@@ -42,6 +45,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% include 'admin/partials/pagination.html' %}
     </div>
 </div>
 
