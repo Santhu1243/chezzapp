@@ -41,6 +41,7 @@ class IncidentIssue(models.Model):
          choices=STATUS_CHOICES,
          default='active',
      )
+    company_name = models.CharField(max_length=255, default="unknown")
     
 
     def save(self, *args, **kwargs):
@@ -60,7 +61,7 @@ class IncidentIssue(models.Model):
 class IncidentIssueForm(forms.ModelForm):
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment']
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'company_name']
 
 
 class Issue(models.Model):

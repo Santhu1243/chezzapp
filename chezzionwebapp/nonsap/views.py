@@ -677,3 +677,9 @@ def user_redirect(request):
     else:
         return redirect('nonsap:home')
 
+from django.contrib.auth.models import User
+
+def get_user_group(self):
+    return self.groups.first().name if self.groups.exists() else ""
+
+User.add_to_class("group_name", property(get_user_group))

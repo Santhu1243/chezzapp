@@ -17,6 +17,10 @@
                 <td><strong class="highlight">{{ issue.custom_id }}</strong></td>
             </tr>
             <tr>
+                <td><strong>Company Name</strong></td>
+                <td><strong>{{ request.user.groups.first.name }}</strong></td>
+            </tr>
+            <tr>
                 <td><strong>Issue Title</strong></td>
                 <td>{{ issue.issue }}</td>
             </tr>
