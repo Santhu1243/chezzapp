@@ -27,7 +27,7 @@ class IncidentIssue(models.Model):
     report_time = models.TimeField()
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
-    assigned_date = models.DateTimeField(auto_now_add=True)
+    assigned_date = models.DateTimeField(null=True, blank=True)
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -37,10 +37,11 @@ class IncidentIssue(models.Model):
      )
     priority = models.CharField(
          max_length=10,
-         choices=STATUS_CHOICES,
+         choices=PRIORITY_CHOICES,
          default='active',
      )
     company_name = models.CharField(max_length=255, default="unknown")
+    resolutionDate = models.DateTimeField(blank=True, null=True)
     
 
     def save(self, *args, **kwargs):
@@ -60,7 +61,7 @@ class IncidentIssue(models.Model):
 class IncidentIssueForm(forms.ModelForm):
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'company_name']
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'company_name', 'resolutionDate', 'priority']
 
 
 class Issue(models.Model):
@@ -71,7 +72,14 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
-
+    PRIORITY_CHOICES = [
+        ('P1', 'P1 - High'),
+        ('P2', 'P2 - Medium'),
+        ('P3', 'P3 - Low'),
+        ('P4', 'P4 - Custom'),
+    ]
+    priority = models.CharField(max_length=2, choices=PRIORITY_CHOICES, blank=True, null=True)
+    custom_days = models.IntegerField(null=True, blank=True)
     def __str__(self):
         return self.title
 class Meta:
@@ -117,3 +125,20 @@ class Attachment(models.Model):
 
 
 
+
+class PriorityForm(forms.Form):
+    priority = forms.ChoiceField(choices=PRIORITY_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+
+
+from django.contrib.auth.models import User
+from django.db import models
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username

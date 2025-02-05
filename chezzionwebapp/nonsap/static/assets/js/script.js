@@ -94,3 +94,4 @@ function updateSortIcons(columnIndex, tableId) {
         icon.classList.add(sortDirection[tableId][columnIndex] ? "fa-arrow-up" : "fa-arrow-down");
     }
 }
+

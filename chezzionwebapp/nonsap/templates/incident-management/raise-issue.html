@@ -110,10 +110,10 @@
                 </div>
                 <div class="col-md-9 col-sm-12">
                     <select id="priority" name="priority" class="form-control">
-                        <option value="p1">P1 (Resolve in 1 day)</option>
-                        <option value="p2">P2 (Resolve in 3 days)</option>
-                        <option value="p3">P3 (Resolve in 6-7 days)</option>
-                        <option value="p4">P4 (Custom)</option>
+                        <option value="P1">P1 (Resolve in 1 day)</option>
+                        <option value="P2">P2 (Resolve in 3 days)</option>
+                        <option value="P3">P3 (Resolve in 6-7 days)</option>
+                        <option value="P4">P4 (Custom)</option>
                     </select>
                 </div>
             </div>
@@ -232,10 +232,10 @@
             let priority = $('#priority').val();
             let daysToAdd;
 
-            if (priority === "p1") daysToAdd = 1;
-            else if (priority === "p2") daysToAdd = 3;
-            else if (priority === "p3") daysToAdd = 6;
-            else if (priority === "p4") daysToAdd = parseInt($('#days').val());
+            if (priority === "P1") daysToAdd = 1;
+            else if (priority === "P2") daysToAdd = 3;
+            else if (priority === "P3") daysToAdd = 6;
+            else if (priority === "P4") daysToAdd = parseInt($('#days').val());
 
             $('#resolutionDate').val(calculateResolutionDate(daysToAdd));
         }
@@ -244,11 +244,11 @@
         $('#priority').change(function () {
             let priority = $(this).val();
 
-            if (priority === "p4") {
+            if (priority === "P4") {
                 $('#days').prop("disabled", false);
             } else {
                 $('#days').prop("disabled", true);
-                $('#days').val(priority === "p1" ? 1 : priority === "p2" ? 3 : 6);
+                $('#days').val(priority === "P1" ? 1 : priority === "P2" ? 3 : 6);
             }
 
             updateResolutionDate();
