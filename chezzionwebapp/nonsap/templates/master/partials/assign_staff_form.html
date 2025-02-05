@@ -7,12 +7,12 @@
                 {% for staff in staff_members %}
                 <option value="{{ staff.id }}">{{ staff.username }}</option>
                 {% empty %}
-                <option value="" disabled>No staff members available</option>
+                <option value="" disabled>No consultants available</option>
                 {% endfor %}
             </select>
         </div>
         <div class="staff-btn">
-            <button type="submit" class="btn btn-success">Assign</button>
+            <button type="submit" class="btn btn-success ms-3">Assign</button>
         </div>
     </div>
 </form>

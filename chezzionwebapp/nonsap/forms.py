@@ -16,7 +16,7 @@ class IncidentIssueForm(forms.ModelForm):
 
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'reporter']
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'reporter', 'company_name', 'resolutionDate', 'priority']
 
     def clean_reporter(self):  # sourcery skip: raise-from-previous-error
         """ Custom validation for the reporter field. """
@@ -71,3 +71,12 @@ class StaffLoginForm(forms.Form):
 class SuperAdminLoginForm(forms.Form):
     username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"class": "form-control"}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))
+
+from django import forms
+from .models import Profile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['bio', 'profile_picture']  # Fields you want the user to update
+

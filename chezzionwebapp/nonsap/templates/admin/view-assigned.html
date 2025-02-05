@@ -15,13 +15,15 @@
                 <tr>
                     <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')"># <i id="sort-icon-0"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Username <i id="sort-icon-1"
+                    <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Complaint Id <i id="sort-icon-1"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Issue Title <i id="sort-icon-2"
+                    <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Username <i id="sort-icon-1"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Status <i id="sort-icon-3"
+                    <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Issue Title <i id="sort-icon-2"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Reported on <i id="sort-icon-4"
+                    <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Status <i id="sort-icon-3"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Reported on <i id="sort-icon-4"
                                 class="fas fa-sort"></i></button></th>
                     <th>Action</th>
                 </tr>
@@ -30,6 +32,8 @@
                 {% for issue in assigned_issues %}
                 <tr>
                     <td>{{ issue.id }}</td>
+                    <td><a class="text-decoration-none fw-bold" href="{% url 'nonsap:view_details' issue.id %}">
+                            {{ issue.custom_id }}</a></td>
                     <td>{{ issue.reporter.username }}</td>
                     <td>{{ issue.issue }}</td>
                     <td>{{ issue.status }}</td>

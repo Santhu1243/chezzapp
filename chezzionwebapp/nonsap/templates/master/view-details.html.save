@@ -1,0 +1,99 @@
+{% extends "superuser-base.html" %}
+
+{% block start %}
+<div class="container mt-5">
+    {% if user.is_authenticated %}
+    <h1 class="text-center">Issue Details</h1>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th scope="col">Field</th>
+                <th scope="col">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Custom Id</strong></td>
+                <td><strong class="highlight">{{ issue.custom_id }}</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Project Name</strong></td>
+                <td>{{ issue.company_name}}</td>
+            </tr>
+            <tr>
+                <td><strong>Issue Title</strong></td>
+                <td>{{ issue.issue }}</td>
+            </tr>
+            <tr>
+                <td><strong>Description</strong></td>
+                <td>{{ issue.description }}</td>
+            </tr>
+            <tr>
+                <td><strong>Report Date</strong></td>
+                <td>{{ issue.report_date }}</td>
+            </tr>
+            <tr>
+                <td><strong>Report Time</strong></td>
+                <td>{{ issue.report_time }}</td>
+            </tr>
+            <tr>
+                <td><strong>Assigned to</strong></td>
+                <td>
+                    {% if issue.assigned_to %}
+                    {{ issue.assigned_to.username }}
+                    {% else %}
+                    Not Assigned
+                    {% endif %}
+                </td>
+            </tr>
+             <tr>
+                 <td><strong>Reassign</strong></td>
+                 <td class="reassign">{% include 'master/partials/assign_staff_form.html' %} </td>
+             </tr>
+            <tr>
+                <td>
+                    <strong>Assigned on</strong>
+                </td>
+                <td>
+                    {{ issue.assigned_date }}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Reassign</strong></td>
+            <tr>
+                <td><strong>Status</strong></td>
+                <td>
+                    {% if issue.status == 'active' %}
+
+                    <button class="btn btn-danger">{{ issue.status }}</button>
+
+                    {% elif issue.status == 'inprogress' %}
+
+                    <button class="btn btn-secondary">{{ issue.status }}</button>
+                    {% else %}
+                    <button class="btn btn-success">{{ issue.status }}</button>
+
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Root Cause</strong></td>
+                <td>{{ issue.root_cause }}</td>
+            </tr>
+            <tr>
+                <td><strong>Priority</strong></td>
+                <td>{% include 'master/partials/priority_form.html' %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% include 'incident-management/partials/attachments.html' %}
+
+    {% include 'incident-management/partials/comments.html' %}
+
+    {% else %}
+    <p>Please log in to view issue details.</p>
+    {% endif %}
+</div>
+{% endblock %}

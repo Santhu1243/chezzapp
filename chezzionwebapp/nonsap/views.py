@@ -89,35 +89,29 @@ def authenticate_user(request, username, password):
 
 
 def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            # Get the user credentials from the form
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            
-            # Authenticate the user
-            user = authenticate(request, username=username, password=password)
-            
-            if user is None:
-                # If authentication fails, return an error
-                form.add_error(None, "Invalid username or password.")
-            elif user.is_staff or user.is_superuser:
-                # Add an error message if the user is staff or superuser
-                form.add_error(None, "Access denied. Only regular users are allowed.")
-            else:
-                # Log the user in
-                login(request, user)
-                messages.success(request, f"Logged in as {user.username}")
-                
-                # Redirect to home page or another page
-                return redirect('home')  # Replace 'home' with your desired URL name
-        else:
-            form.add_error(None, "Please fill in all fields.")
-    else:
-        form = LoginForm()
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
 
-    return render(request, 'registration/login.html', {'form': form})
+        if user is not None:
+            login(request, user)
+
+            # Redirect based on user role
+            if user.is_superuser:
+                return redirect("superadmin_dashboard")  # Change this to the actual URL name
+            elif user.is_staff:
+                return redirect("admin_dashboard")  # Change this to the actual URL name
+            else:
+                return redirect("home")  # Change this to the actual home URL name
+        else:
+            error_message = "Invalid username or password."
+
+    else:
+        error_message = None
+
+    return render(request, "login.html", {"error_message": error_message})
+
 
 
 
@@ -174,6 +168,7 @@ def raise_issue(request):
                 )
 
             # Send email notification to the reporter
+            login_link = "https://staging.chezzion.com/superadmin-login/"
             try:
                 send_mail(
                     'Issue Reported Successfully',
@@ -346,12 +341,13 @@ def assign_staff(request, issue_id):  # sourcery skip: use-named-expression
             try:
                 staff = User.objects.get(id=staff_id, is_staff=True)
                 assign_staff_to_issue(staff, issue)  # Assign staff to the issue
+                issue.status = 'inprogress'
+                issue.assigned_date = now()   
                 issue.save()
-
                 # Sending Email to Staff Member
                 login_link = "https://staging.chezzion.com/staff-login/"
                 staff_subject = 'New Complaint Assigned to You'
-                staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.custom_id}). Please take appropriate action.Please login here {login_link}'
+                staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.custom_id}). Please take appropriate action. please log in here {login_link}'
                 send_mail(
                     staff_subject,
                     staff_message,
@@ -428,9 +424,9 @@ from django.contrib.auth.decorators import login_required
 def common_view(request, issue_id, template_name):
     # Fetch the issue object
     issue = get_object_or_404(IncidentIssue, id=issue_id)
-
     # Fetch attachments
     attachments = issue.attachments.all()
+    staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
 
     # Handle form submission
     if request.method == "POST":
@@ -462,9 +458,12 @@ def common_view(request, issue_id, template_name):
         {
             'issue': issue,
             'attachments': attachments,
+            'staff_members': staff_members,
             'form': form,
             'comments': comments,
-            'page_obj': page_obj,  # Include paginated comments
+            'page_obj': page_obj,
+            'priority_choices': Issue.PRIORITY_CHOICES,
+              
         }
     )
 
@@ -596,6 +595,9 @@ def superadmin_login_view(request):
 
 
 
+
+
+@login_required
 def update_rootcause(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
@@ -607,10 +609,27 @@ def update_rootcause(request, issue_id):
         issue.root_cause = root_cause
         issue.save()
 
-        # Redirect to the issue details page or another page after update
+        # Get the logged-in staff member
+        staff_user = request.user
+
+        # Get all super admin users (assuming is_superuser field in Django User model)
+        super_admins = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+
+        # Send email notification
+        if super_admins:
+            send_mail(
+                subject='Root Cause Updated',
+                message=f'The root cause for issue {issue.custom_id} has been updated by {staff_user.username}:\n\n{root_cause}',
+                from_email='no-reply@chezzion.com',
+                recipient_list=list(super_admins),
+                fail_silently=False,
+            )
+
+        # Redirect to the issue details page
         return redirect('nonsap:view_details', issue_id=issue.id)
 
     return render(request, 'admin/view-issue.html', {'issue': issue})
+
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -660,6 +679,8 @@ User.add_to_class("group_name", property(get_user_group))
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from .forms import ProfileForm 
+from .models import Profile
 
 @login_required
 def profile_page(request):
@@ -676,5 +697,16 @@ def profile_page(request):
     # Get user's groups
     groups = user.groups.all()
 
-    return render(request, "account/profile.html", {"user": request.user})
+    return render(
+        request,
+        "account/profile.html",
+        {
+            "user": user,
+            "groups": groups,
+            "base_template": base_template,
+            "is_superuser": user.is_superuser,
+            "is_staff": user.is_staff,
+        },
+    )
+
 

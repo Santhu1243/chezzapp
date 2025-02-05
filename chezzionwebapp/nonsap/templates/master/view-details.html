@@ -17,8 +17,8 @@
                 <td><strong class="highlight">{{ issue.custom_id }}</strong></td>
             </tr>
             <tr>
-                <td><strong>Company Name</strong></td>
-                <td><strong>{{ request.user.groups.first.name }}</strong></td>
+                <td><strong>Project Name</strong></td>
+                <td>{{ issue.company_name}}</td>
             </tr>
             <tr>
                 <td><strong>Issue Title</strong></td>
@@ -48,8 +48,16 @@
             </tr>
              <tr>
                  <td><strong>Reassign</strong></td>
-                 <td class="reassign">{% include 'master/partials/assign_staff_form.html' %} </td>
+                 <td class="reassign d-flex">{% include 'master/partials/assign_staff_form.html' %} </td>
              </tr>
+            <tr>
+                <td>
+                    <strong>Assigned on</strong>
+                </td>
+                <td>
+                    {{ issue.assigned_date }}
+                </td>
+            </tr>
             <tr>
                 <td><strong>Status</strong></td>
                 <td>

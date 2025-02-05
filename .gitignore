@@ -6,3 +6,6 @@ chezzionwebapp/chezzionwebapp/settings.py
 chezzionwebapp/chezzionwebapp/__pycache__/
 *.pyc
 *.pyo
+
+*.pyc
+__pycache__/

@@ -20,8 +20,6 @@
                     <th>Status</th>
                     <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Reported On <i id="sort-icon-4"
                                 class="fas fa-sort"></i></button></th>
-                  <!--  <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Assigned To <i id="sort-icon-5"
-                                class="fas fa-sort"></i></button></th> -->
                     <th>Assign Consultant</th>
                 </tr>
             </thead>
@@ -43,8 +41,6 @@
                         {% else %}
                         Assigned to: {{ issue.assigned_to.username }}
                        {% endif %}
-                    </td>
-
                 </tr>
                 {% empty %}
                 <tr>
@@ -72,15 +68,14 @@
                 {% include 'master/partials/status_update_form.html' %}
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
-                    {% if issue.assigned_staff %}
-                    {{ issue.assigned_staff.username }}
+                     {% if issue.assigned_to %}
+                    Assigned to {{ issue.assigned_to.username }}
                     {% else %}
-                    Not Assigned
+                    {% include 'master/partials/assign_staff_form.html' %}
                     {% endif %}
                 </p>
-                <a class="btn btn-primary mb-2" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
-                {% include 'master/partials/assign_staff_form.html' %}
-            </div>
+                <a class="btn btn-primary mb-2 w-100 " href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
+                            </div>
         </div>
         {% empty %}
         <div class="alert alert-info text-center">No issues found.</div>
