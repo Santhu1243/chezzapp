@@ -27,6 +27,11 @@ from django.db.models import F
 from .forms import StaffLoginForm, SuperAdminLoginForm
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
+import logging
+
+# Set up the logger
+logger = logging.getLogger(__name__)
+
 
 # Home view
 @login_required
@@ -179,21 +184,24 @@ def raise_issue(request):
                 )
             except Exception as e:
                 print(f"Error sending email to reporter: {e}")
+                logger.error(f"Error sending email to reporter: {e}")
 
             # Get emails of all superadmins and send one email to all of them
             superadmins = User.objects.filter(is_superuser=True)
             superadmin_emails = [admin.email for admin in superadmins]
+            print(f"Superadmin emails: {superadmin_emails}")  # Debugging line
 
             try:
                 send_mail(
                     'New Issue Reported',
-                    f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}. Complaint Number:  {incident_issue.reporter.custom_id}',
+                    f'A new issue "{incident_issue.issue}" has been reported by {incident_issue.reporter.username}. Complaint Number:  {incident_issue.custom_id}\n\nTo view and manage this issue, please login here: {login_link}',
                     settings.DEFAULT_FROM_EMAIL,
                     superadmin_emails,  # Send to all superadmins at once
                     fail_silently=False,
                 )
             except Exception as e:
                 print(f"Error sending email to superadmins: {e}")
+                logger.error(f"Error sending email to superadmins: {e}")
 
             # Success message and redirect
             messages.success(request, f'Issue "{incident_issue.issue}" has been reported successfully!')
@@ -205,6 +213,7 @@ def raise_issue(request):
         form = IncidentIssueForm()
 
     return render(request, 'incident-management/raise-issue.html', {'form': form})
+
 
 
 
@@ -340,8 +349,9 @@ def assign_staff(request, issue_id):  # sourcery skip: use-named-expression
                 issue.save()
 
                 # Sending Email to Staff Member
+                login_link = "https://staging.chezzion.com/staff-login/"
                 staff_subject = 'New Complaint Assigned to You'
-                staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.custom_id}). Please take appropriate action.'
+                staff_message = f'Hello {staff.username},\n\nYou have been assigned a new complaint (ID: {issue.custom_id}). Please take appropriate action.Please login here {login_link}'
                 send_mail(
                     staff_subject,
                     staff_message,

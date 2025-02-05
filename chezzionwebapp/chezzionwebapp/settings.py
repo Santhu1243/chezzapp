@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import pymysql
 pymysql.install_as_MySQLdb()
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,7 +29,11 @@ SECRET_KEY = 'django-insecure-+=4tvm@x4%x7))ik0ug$f5h4^_1%v7f-@6u6w9uy8t7j^dm_m!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['staging.chezzion.com']
+CSRF_TRUSTED_ORIGINS = ['https://staging.chezzion.com']
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
 
 
 # Application definition
@@ -85,17 +89,17 @@ WSGI_APPLICATION = 'chezzionwebapp.wsgi.application'
 #     }
 # }
 
+# Use staging database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'chezzionapp',  
-        'USER': 'root',  
-        'PASSWORD': '', 
-        'HOST': 'localhost',  
-        'PORT': '3306',  
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'chezzionweb',
+        'USER': 'chezzionuser',
+        'PASSWORD': 'chezzion@2025',
+        'HOST': 'mysql',
+        'PORT': '3306',
     }
 }
-
 
 
 # Password validation
@@ -136,6 +140,8 @@ STATIC_URL = '/static/'
 STATIC_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

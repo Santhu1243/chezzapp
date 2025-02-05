@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-evenly">
         <div class="select-staff">
             <select name="staff_id" class="form-select" required>
-                <option value="" disabled selected>Assign to Staff</option>
+                <option value="" disabled selected>Assign to Consultant</option>
                 {% for staff in staff_members %}
                 <option value="{{ staff.id }}">{{ staff.username }}</option>
                 {% empty %}
