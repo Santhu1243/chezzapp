@@ -16,7 +16,7 @@
 
     <!-- Custom Days Input for P4 -->
     <div class="form-group d-md-flex ">
-        <div class="col-md-9 col-sm-12">
+        <div class="col-md-9 col-sm-12 mt-2">
             <input type="number" id="days" name="days" class="form-control" placeholder="Enter custom days"
                 value="{{ issue.custom_days }}" {% if issue.priority != 'P4' %}disabled{% endif %}>
         </div>
@@ -26,7 +26,7 @@
     <div class="form-group d-md-flex ">
         <div class="col-md-9 col-sm-12">
             <label for="resolutionDate">Resolution Date</label>
-            <input type="text" id="resolutionDate" class="form-control" readonly value="{{ resolution_date }}">
+            <input type="text" id="resolutionDate" name="resol_date" class="form-control" readonly value="{{ resolution_date }}">
         </div>
     </div>
 
@@ -35,10 +35,59 @@
 </form>
 
 
+
+
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let prioritySelect = document.getElementById("priority");
+        let daysInput = document.getElementById("days");
+        let resolutionDateInput = document.getElementById("resolutionDate");
 
+        // Predefined priority-to-days mapping
+        let priorityDaysMapping = {
+            "P1": 1, // 1 day for P1
+            "P2": 3, // 3 days for P2
+            "P3": 7, // 7 days for P3
+            "P4": null // Custom days (user input)
+        };
 
+        function updateFields() {
+            let selectedPriority = prioritySelect.value;
 
+            if (selectedPriority === "P4") {
+                daysInput.disabled = false;
+            } else {
+                daysInput.disabled = true;
+                daysInput.value = priorityDaysMapping[selectedPriority] || "";
+            }
 
+            updateResolutionDate();
+        }
 
+        function updateResolutionDate() {
+            let selectedPriority = prioritySelect.value;
+            let daysToAdd = selectedPriority === "P4" ? parseInt(daysInput.value) || 0 : priorityDaysMapping[selectedPriority];
+
+            if (!daysToAdd) {
+                resolutionDateInput.value = "";
+                return;
+            }
+
+            let currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + daysToAdd);
+            let formattedDate = currentDate.toISOString().split("T")[0];
+
+            resolutionDateInput.value = formattedDate;
+        }
+
+        // Event Listeners
+        prioritySelect.addEventListener("change", updateFields);
+        daysInput.addEventListener("input", updateResolutionDate);
+
+        // Initialize fields on page load
+        updateFields();
+    });
 </script>
+
+
+

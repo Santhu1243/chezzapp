@@ -37,7 +37,6 @@
                     <td>{{ issue.issue }}</td>
                     <td>{% include 'master/partials/status_update_form.html' %}</td>
                     <td data-type="date">{{ issue.report_date }}</td>
-                    <!-- <td>{% if issue.assigned_to %}{{ issue.assigned_to.username }}{% else %}Not Assigned{% endif %}</td> -->
                     <td>{% if issue.assigned_to %}
                         Assigned to {{ issue.assigned_to.username }}
                         {% else %}
@@ -66,20 +65,20 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">Issue #{{ issue.id }}</h5>
+                <p class="card-text"><strong>Project :</strong> {{ issue.company_name }}</p>
                 <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
                 {% include 'master/partials/status_update_form.html' %}
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
-                    {% if issue.assigned_staff %}
-                    {{ issue.assigned_staff.username }}
+                    {% if issue.assigned_to %}
+                    Assigned to {{ issue.assigned_to.username }}
                     {% else %}
-                    Not Assigned
+                    {% include 'master/partials/assign_staff_form.html' %}
                     {% endif %}
                 </p>
-                <a class="btn btn-primary mb-2" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
-                {% include 'master/partials/assign_staff_form.html' %}
+                <a class="btn btn-primary mb-2 w-100" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
             </div>
         </div>
         {% empty %}

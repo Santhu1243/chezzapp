@@ -626,28 +626,40 @@ def update_rootcause(request, issue_id):
 
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Issue
 
 def update_priority(request, issue_id):
-    # Get the issue object
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
     if request.method == 'POST':
-        # Get the selected priority and resolution days
         priority = request.POST.get('priority')
         resolution_days = request.POST.get('days')
 
-        # Update the priority and resolution days in the database
+        try:
+            resolution_days = int(resolution_days) if resolution_days else 0
+        except ValueError:
+            resolution_days = 0
+
         issue.priority = priority
         issue.resolution_days = resolution_days
+
+        if resolution_days > 0:
+            issue.resolution_date = now().date() + timedelta(days=resolution_days)
+        else:
+            issue.resolution_date = None
+
+        # Debugging outputs
+        print(f"Priority: {priority}")
+        print(f"Resolution Days: {resolution_days}")
+        print(f"Resolution Date: {issue.resolution_date}")
+
         issue.save()
 
-        # Redirect to the issue detail page or other relevant page
         return redirect('nonsap:view_issue', issue_id=issue.id)
 
-    # If not POST, render the form with the current issue data
-    return render(request, 'issue_detail.html', {'issue': issue})
+    return render(request, 'master/view-details.html', {'issue': issue})
+
+
+
 
 
 

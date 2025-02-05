@@ -27,7 +27,7 @@ class IncidentIssue(models.Model):
     report_time = models.TimeField()
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
-    assigned_date = models.DateTimeField(null=True, blank=True)
+    assigned_date = models.DateTimeField(default="2021-09-01 00:00:00")
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -41,7 +41,7 @@ class IncidentIssue(models.Model):
          default='active',
      )
     company_name = models.CharField(max_length=255, default="unknown")
-    resolutionDate = models.DateTimeField(blank=True, null=True)
+    resolutionDate = models.DateField(null=True)
     
 
     def save(self, *args, **kwargs):
