@@ -41,7 +41,7 @@ class IncidentIssue(models.Model):
          default='active',
      )
     company_name = models.CharField(max_length=255, default="unknown")
-    resolutionDate = models.DateTimeField(blank=True, null=True)
+    resolutionDate = models.DateField(null=True)
     
 
     def save(self, *args, **kwargs):

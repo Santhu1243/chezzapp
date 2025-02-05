@@ -35,12 +35,12 @@
                     <td>{{ issue.issue }}</td>
                     <td>{% include 'master/partials/status_update_form.html' %}</td>
                     <td data-type="date">{{ issue.report_date }}</td>
-                  <!--  <td>{% if issue.assigned_to %}{{ issue.assigned_to.username }}{% else %}Not Assigned{% endif %}</td> -->
-                    <td>{% if not issue.assigned_to %}
-                          {% include 'master/partials/assign_staff_form.html' %}
+                    <td>{% if issue.assigned_to %}
+                        Assigned to {{ issue.assigned_to.username }}
                         {% else %}
-                        Assigned to: {{ issue.assigned_to.username }}
-                       {% endif %}
+                        {% include 'master/partials/assign_staff_form.html' %}
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -62,13 +62,14 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">Issue #{{ issue.id }}</h5>
+                <p class="card-text"><strong>Project :</strong> {{ issue.company_name }}</p>
                 <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
                 {% include 'master/partials/status_update_form.html' %}
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
-                     {% if issue.assigned_to %}
+                    {% if issue.assigned_to %}
                     Assigned to {{ issue.assigned_to.username }}
                     {% else %}
                     {% include 'master/partials/assign_staff_form.html' %}
