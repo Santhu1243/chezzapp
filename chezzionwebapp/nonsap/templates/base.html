@@ -6,8 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Chezzion Web app{% endblock %}</title>
     {% load static %}
+    {% load tz %}
+    {% load pwa %}
+    <meta name="theme-color" content="#ffffff">
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/logo-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'icons/logo-icon.png' %}">
+
     <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo-icon.png' %}">
     <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="shortcut icon" href="{% static 'assets/img/fav-icon.png' %}" type="image/x-icon">
     <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
 
     <!-- Bootstrap Datepicker CSS -->
@@ -80,6 +88,16 @@
 
     {% block start %}
     {% endblock %}
+    <footer class="">
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-6 mx-auto text-center">
+                    <p>&copy; 2025 <a class="text-decoration-none fw-bold" href="https://chezzion.com"
+                            target="_blank">Chezzion.</a> All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script src="{% static 'assets/js/bootstrap.js' %}"></script>
@@ -99,7 +117,10 @@
             var currentDate = new Date();
             $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB')); // Formats the date to dd/mm/yyyy
             $('#reportdatepicker').datepicker({
-                autoclose: true
+                autoclose: true,
+                todayHighlight: true,
+                format: 'yyyy-mm-dd',
+                startDate: currentDate,
             });
 
             // Get the current time

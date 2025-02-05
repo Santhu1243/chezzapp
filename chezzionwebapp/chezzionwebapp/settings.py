@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
 
 # Application definition
 
@@ -39,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'nonsap'
+    'django_extensions',
+    'nonsap',
+    'pwa',
 ]
 
 MIDDLEWARE = [
@@ -120,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -166,3 +170,17 @@ MEDIA_URL = '/media/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/uploads')
 
 
+# web app configuration
+
+PWA_APP_NAME = "Chezzion"
+PWA_APP_DESCRIPTION = "chezzion web app"
+PWA_APP_THEME_COLOR = "#ffffff"
+PWA_APP_BACKGROUND_COLOR = "#ffffff"
+PWA_APP_ICONS = [
+    {"src": "static/icons/logo-icon.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "static/icons/logo-icon.png", "sizes": "512x512", "type": "image/png"},
+]
+PWA_APP_SPLASH_SCREEN = [
+    {"src": "static/icons/splash-640x1136.png", "media": "(device-width: 320px)"},
+    {"src": "static/icons/splash-750x1334.png", "media": "(device-width: 375px)"},
+]

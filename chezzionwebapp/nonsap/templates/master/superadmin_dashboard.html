@@ -11,16 +11,18 @@
                 <tr>
                     <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')">Issue ID <i id="sort-icon-0"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Username <i id="sort-icon-1"
+                    <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Project Name <i id="sort-icon-1"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Issue Title <i id="sort-icon-2"
+                    <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Username <i id="sort-icon-2"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Issue Title <i id="sort-icon-3"
                                 class="fas fa-sort"></i></button></th>
                     <th>Status</th>
                     <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Reported On <i id="sort-icon-4"
                                 class="fas fa-sort"></i></button></th>
-                    <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Assigned To <i id="sort-icon-5"
-                                class="fas fa-sort"></i></button></th>
-                    <th>Assign Staff</th>
+                    <!-- <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Assigned To <i id="sort-icon-5"
+                                class="fas fa-sort"></i></button></th> -->
+                    <th>Assign Consultant</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,12 +30,21 @@
                 <tr>
                     <td><a class="highlight" href="{% url 'nonsap:view_issue' issue.id %}">{{ issue.custom_id }}</a>
                     </td>
-                    <td>{{ issue.reporter.username }}</td>
+                    <td>{{ issue.company_name}}
+                    </td>
+                    <td>{{ issue.reporter.username }}
+                    </td>
                     <td>{{ issue.issue }}</td>
                     <td>{% include 'master/partials/status_update_form.html' %}</td>
                     <td data-type="date">{{ issue.report_date }}</td>
-                    <td>{% if issue.assigned_to %}{{ issue.assigned_to.username }}{% else %}Not Assigned{% endif %}</td>
-                    <td>{% include 'master/partials/assign_staff_form.html' %}</td>
+                    <!-- <td>{% if issue.assigned_to %}{{ issue.assigned_to.username }}{% else %}Not Assigned{% endif %}</td> -->
+                    <td>{% if issue.assigned_to %}
+                        Assigned to {{ issue.assigned_to.username }}
+                        {% else %}
+                        {% include 'master/partials/assign_staff_form.html' %}
+                        {% endif %}
+                    </td>
+
                 </tr>
                 {% empty %}
                 <tr>
