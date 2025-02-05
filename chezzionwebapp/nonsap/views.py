@@ -627,7 +627,6 @@ def update_rootcause(request, issue_id):
 
 
 
-
 def update_priority(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
@@ -643,17 +642,22 @@ def update_priority(request, issue_id):
         issue.priority = priority
         issue.resolution_days = resolution_days
 
-        # If using DateTimeField, add a default time (e.g., midnight)
         if resolution_days > 0:
-            issue.resolution_date = now() + timedelta(days=resolution_days)
+            issue.resolution_date = now().date() + timedelta(days=resolution_days)
         else:
-            issue.resolution_date = None  # Clear if no valid days
+            issue.resolution_date = None
+
+        # Debugging outputs
+        print(f"Priority: {priority}")
+        print(f"Resolution Days: {resolution_days}")
+        print(f"Resolution Date: {issue.resolution_date}")
 
         issue.save()
 
         return redirect('nonsap:view_issue', issue_id=issue.id)
 
     return render(request, 'master/view-details.html', {'issue': issue})
+
 
 
 
