@@ -1,4 +1,6 @@
-let sortDirection = {};
+if (typeof sortDirection === "undefined") {
+    let sortDirection = {};
+}
 
 
 function confirmLogout() {
@@ -8,30 +10,42 @@ function confirmLogout() {
   }
 }
 
-document.getElementById("add-more").addEventListener("click", function () {
-  const container = document.getElementById("file-input-container");
-  const inputCount = container.getElementsByTagName("input").length; // To maintain unique ID for each input
+document.addEventListener("DOMContentLoaded", function () {
+    let addMoreButton = document.getElementById("add-more");
+    if (addMoreButton) {
+        addMoreButton.addEventListener("click", function () {
+            const container = document.getElementById("file-input-container");
+            if (!container) {
+                console.error("File input container not found!");
+                return;
+            }
 
-  // Create a new wrapper for the file input
-  const newFileInputWrapper = document.createElement("div");
-  newFileInputWrapper.classList.add("file-input-wrapper");
+            const inputCount = container.getElementsByTagName("input").length; // To maintain unique ID for each input
 
-  // Create the new label and input elements
-  const newLabel = document.createElement("label");
-  newLabel.setAttribute("for", `id_attachment_${inputCount}`);
-  newLabel.innerText = "Attach File";
+            // Create a new wrapper for the file input
+            const newFileInputWrapper = document.createElement("div");
+            newFileInputWrapper.classList.add("file-input-wrapper");
 
-  const newInput = document.createElement("input");
-  newInput.setAttribute("type", "file");
-  newInput.setAttribute("name", "attachment");
-  newInput.setAttribute("id", `id_attachment_${inputCount}`);
+            // Create the new label and input elements
+            const newLabel = document.createElement("label");
+            newLabel.setAttribute("for", `id_attachment_${inputCount}`);
+            newLabel.innerText = "Attach File";
 
-  // Append the label and input to the new wrapper
-  newFileInputWrapper.appendChild(newLabel);
-  newFileInputWrapper.appendChild(newInput);
+            const newInput = document.createElement("input");
+            newInput.setAttribute("type", "file");
+            newInput.setAttribute("name", "attachment");
+            newInput.setAttribute("id", `id_attachment_${inputCount}`);
 
-  // Append the new file input wrapper to the container
-  container.appendChild(newFileInputWrapper);
+            // Append the label and input to the new wrapper
+            newFileInputWrapper.appendChild(newLabel);
+            newFileInputWrapper.appendChild(newInput);
+
+            // Append the new file input wrapper to the container
+            container.appendChild(newFileInputWrapper);
+        });
+    } else {
+        console.warn("Button with ID 'add-more' not found.");
+    }
 });
 
 

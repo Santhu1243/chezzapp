@@ -29,8 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  
 
 # Application definition
 
@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
     'nonsap',
     'pwa',
 ]
@@ -133,11 +132,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
+import os
 
-STATIC_URL = '/static/'
-STATIC_DIRS = [
-    BASE_DIR / 'static',
-]
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # This is for development
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # This is required for collectstatic
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
