@@ -277,13 +277,6 @@ img.img-fluid.rotate-img {
     object-fit: cover;
     animation: rotate 5s cubic-bezier(0.33, 0.27, 0.69, 0.76) infinite;
 }
-<<<<<<< HEAD
 td.reassign {
     display: flex;
 }
-=======
-
-.reassign {
-    display: flex;
-}
->>>>>>> 9537619dcda39a13366449f6132b5be1c8a54af9

@@ -31,8 +31,8 @@ ALLOWED_HOSTS = ['staging.chezzion.com']
 CSRF_TRUSTED_ORIGINS = ['https://staging.chezzion.com']
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  
 
 # Application definition
 
@@ -134,19 +134,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 import os
 
-# URL for serving static files
-STATIC_URL = '/static/'
-
-# Directories where Django will search for additional static files
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
-# Directory where collected static files will be stored
-#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # This is for development
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # This is required for collectstatic
 
 
 # Default primary key field type

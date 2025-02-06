@@ -4,19 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Chezzion Web App{% endblock %}</title>
+    <title>{% block title %}Chezzion Web app{% endblock %}</title>
     {% load static %}
+    {% load tz %}
+    {% load pwa %}
+    <meta name="theme-color" content="#ffffff">
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/logo-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'icons/logo-icon.png' %}">
+
     <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo-icon.png' %}">
     <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
     <link rel="shortcut icon" href="{% static 'assets/img/fav-icon.png' %}" type="image/x-icon">
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap Datepicker CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Timepicker CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <meta name="description" content="Chezzion Web App - Your staff dashboard and issue management system.">
-    <style>
-        html {
-            scroll-behavior: smooth;
+
+    <!-- jq-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("{% static 'assets/js/serviceworker.js' %}")
+                .then(function (registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(function (error) {
+                    console.log('Service Worker registration failed:', error);
+                });
         }
-    </style>
+    </script>
 </head>
 
 <body>
@@ -76,7 +100,16 @@
 
     {% block start %}
     {% endblock %}
-
+    <footer class="">
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-6 mx-auto text-center">
+                    <p>&copy; 2025 <a class="text-decoration-none fw-bold" href="https://chezzion.com"
+                            target="_blank">Chezzion.</a> All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
     <script src="{% static 'assets/js/bootstrap.js' %}"></script>
     <script src="{% static 'assets/js/script.js' %}"></script>
     <script>
