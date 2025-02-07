@@ -95,3 +95,24 @@ function updateSortIcons(columnIndex, tableId) {
     }
 }
 
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+
+    let installBtn = document.getElementById('install-button');
+    installBtn.style.display = 'block';
+    
+    installBtn.addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted PWA install');
+            } else {
+                console.log('User dismissed PWA install');
+            }
+            deferredPrompt = null;
+        });
+    });
+});
