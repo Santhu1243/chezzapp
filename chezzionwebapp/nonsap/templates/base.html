@@ -97,6 +97,7 @@
 
         </div>
     </nav>
+    <button id="install-button" style="display: none;">Install App</button>
 
     {% block start %}
     {% endblock %}
@@ -127,7 +128,7 @@
         $(document).ready(function () {
             // Get the current date 
             var currentDate = new Date();
-            $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB')); // Formats the date to dd/mm/yyyy
+            $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB'));
             $('#reportdatepicker').datepicker({
                 autoclose: true,
                 todayHighlight: true,

@@ -53,17 +53,8 @@
             <tr>
                 <td><strong>Status</strong></td>
                 <td>
-                    {% if issue.status == 'active' %}
+                    {% include 'master/partials/status_update_form.html' %}
 
-                    <button class="btn btn-danger">{{ issue.status }}</button>
-
-                    {% elif issue.status == 'inprogress' %}
-
-                    <button class="btn btn-secondary">{{ issue.status }}</button>
-                    {% else %}
-                    <button class="btn btn-success">{{ issue.status }}</button>
-
-                    {% endif %}
 
                 </td>
             </tr>
