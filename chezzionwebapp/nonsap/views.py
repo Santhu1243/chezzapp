@@ -427,6 +427,7 @@ def common_view(request, issue_id, template_name):
     # Fetch attachments
     attachments = issue.attachments.all()
     staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
+    status_choices = Issue._meta.get_field('status').choices
 
     # Handle form submission
     if request.method == "POST":
@@ -463,6 +464,8 @@ def common_view(request, issue_id, template_name):
             'comments': comments,
             'page_obj': page_obj,
             'priority_choices': Issue.PRIORITY_CHOICES,
+            'status_choices': status_choices,
+
               
         }
     )
@@ -488,11 +491,12 @@ from .models import IncidentIssue, STATUS_CHOICES
 from django.shortcuts import get_object_or_404, render
 
 
+
 @login_required
 def update_status(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not request.user.is_staff:
         return HttpResponseForbidden("You do not have permission to update this status.")
 
     if request.method == "POST":
@@ -508,20 +512,18 @@ def update_status(request, issue_id):
             send_status_change_email(issue, old_status, new_status)
 
             messages.success(request, f"Status for issue #{issue_id} updated to '{dict(STATUS_CHOICES)[new_status]}'.")
+
         else:
             messages.error(request, "Invalid status value.")
 
-    # Check where to redirect after updating the status
-    if 'from_dashboard' in request.GET:
-        template_name = 'master/superadmin_dashboard.html'
-    else:
-        template_name = 'master/view-details.html'
+    # 🔹 Redirect based on user type
+    if request.user.is_superuser:
+        return redirect('nonsap:view_issue', issue_id=issue.id)  # Redirect superadmin to dashboard
+    elif request.user.is_staff:
+        return redirect('nonsap:view_details', issue_id=issue.id)  # Redirect staff to issue details
 
-    context = {
-        'issue': issue,
-        'status_choices': STATUS_CHOICES,
-    }
-    return render(request, template_name, context)
+    return redirect('nonsap:home')  # Fallback redirection
+
 
 
 def send_status_change_email(issue, old_status, new_status):

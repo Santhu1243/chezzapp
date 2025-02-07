@@ -33,7 +33,13 @@
                     <td>{{ issue.reporter.username }}
                     </td>
                     <td>{{ issue.issue }}</td>
-                    <td>{% include 'master/partials/status_update_form.html' %}</td>
+                    <td>{% if issue.status == "resolved" %}
+                            Resolved by {{ issue.assigned_to.username }}
+                        {% else %}
+                            {% include 'master/partials/status_update_form.html' %}
+                        {% endif %}
+
+                   </td>
                     <td data-type="date">{{ issue.report_date }}</td>
                     <td>{% if issue.assigned_to %}
                         Assigned to {{ issue.assigned_to.username }}
@@ -66,14 +72,23 @@
                 <p class="card-text"><strong>Username:</strong> {{ issue.reporter.username }}</p>
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
-                {% include 'master/partials/status_update_form.html' %}
+                {% if issue.status == "Resolved" %}
+                    Resolved by {{ issue.assigned_to.username }}
+                {% else %}
+                   {% include 'master/partials/status_update_form.html' %}
+                {% endif %}
+
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
+                {% if issue.status == "Resolved" %}
+                    Resolved by {{ issue.assigned_to.username }}
+                {% else %}
                     {% if issue.assigned_to %}
-                    Assigned to {{ issue.assigned_to.username }}
+                        Assigned to {{ issue.assigned_to.username }}
                     {% else %}
-                    {% include 'master/partials/assign_staff_form.html' %}
+                        {% include 'master/partials/assign_staff_form.html' %}
                     {% endif %}
+                {% endif %}
                 </p>
                 <a class="btn btn-primary mb-2 w-100 " href="{% url 'nonsap:view_issue' issue.id %}">View Status</a>
                             </div>
@@ -81,7 +96,11 @@
         {% empty %}
         <div class="alert alert-info text-center">No issues found.</div>
         {% endfor %}
+        {% include 'master/partials/pagination.html' %}
+
     </div>
+
+
 </div>
 
 {% else %}
