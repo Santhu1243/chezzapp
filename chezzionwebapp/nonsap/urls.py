@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from .views import all_data, export_issues_csv  # Ensure this import exists
 
 app_name = 'nonsap'
 
@@ -40,6 +41,9 @@ urlpatterns = [
     path('profile/', views.profile_page, name='profile_page'),
     path("pwa/", include("pwa.urls")),
     path("", include("pwa.urls")), 
+    path("superuser/all/", views.all_data, name='all_data'),
+    path('export-issues-csv/', export_issues_csv, name='export_issues_csv'),
+
 
 ]
 
