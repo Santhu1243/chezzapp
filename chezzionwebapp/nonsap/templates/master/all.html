@@ -1,0 +1,87 @@
+{% extends "superuser-base.html" %}
+
+{% block start %}
+{% if user.is_authenticated and user.is_superuser %}
+<div class="container">
+    <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
+    <div class="container text-end">
+        <a href="{% url 'nonsap:export_issues_csv' %}" class="btn btn-success mb-3">Download CSV</a>
+    </div>
+
+    <div class="table-responsive d-none d-lg-block d-sm-none">
+        <table id="issuesTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')">Issue ID <i id="sort-icon-0"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Project Name <i id="sort-icon-1"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Username <i id="sort-icon-2"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Email <i id="sort-icon-3"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Issue Title <i id="sort-icon-4"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Description <i id="sort-icon-5"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(6, 'issuesTable')">Rootcause <i id="sort-icon-6"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(7, 'issuesTable')">Priority <i id="sort-icon-7"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(8, 'issuesTable')">Status <i id="sort-icon-8"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(9, 'issuesTable')">Reported On <i id="sort-icon-9"
+                                class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(10, 'issuesTable')">Reported Time <i
+                                id="sort-icon-10" class="fas fa-sort"></i></button></th>
+                    <th><button class="sort-btn" onclick="sortTable(11, 'issuesTable')">Assigned Consultant <i
+                                id="sort-icon-11" class="fas fa-sort"></i></button></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr>
+                    <td><a class="highlight" href="{% url 'nonsap:view_issue' issue.id %}">{{ issue.custom_id }}</a>
+                    </td>
+                    <td>{{ issue.company_name }}</td>
+                    <td>{{ issue.reporter.username }}</td>
+                    <td>{{ issue.reporter.email }}</td>
+                    <td>{{ issue.issue }}</td>
+                    <td>{{ issue.description }}</td>
+                    <td>{{ issue.root_cause }}</td>
+                    <td>{{ issue.priority }}</td>
+                    <td>
+                        {% if issue.status == "resolved" %}
+                        Resolved by {{ issue.assigned_to.username }}
+                        {% else %}
+                        {% include 'master/partials/status_update_form.html' %}
+                        {% endif %}
+                    </td>
+                    <td>{{ issue.report_date }}</td>
+                    <td>{{ issue.report_time }}</td>
+                    <td>
+                        {% if issue.assigned_to %}
+                        Assigned to {{ issue.assigned_to.username }}
+                        {% else %}
+                        {% include 'master/partials/assign_staff_form.html' %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="12" class="text-center">No issues found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Pagination -->
+        {% include 'master/partials/pagination.html' %}
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-danger mt-5">
+    <h4 class="text-center">You do not have permission to view this page.</h4>
+</div>
+{% endif %}
+{% endblock %}

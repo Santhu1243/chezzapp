@@ -718,3 +718,61 @@ def profile_page(request):
     )
 
 
+def all_data(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        issues = (
+            IncidentIssue.objects.select_related('reporter', 'assigned_to')
+            .annotate(reporter_name=F('reporter__username'), assigned_to_name=F('assigned_to__username'))
+        )
+        staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
+        status_choices = Issue._meta.get_field('status').choices
+
+
+        context = {
+            'staff_members': staff_members,
+            'status_choices': status_choices,
+            'issues': issues
+        }
+        
+        return render(request, 'master/all.html', context)
+    
+
+
+
+
+# csv import 
+import csv
+from django.http import HttpResponse
+from django.db.models import F
+from .models import IncidentIssue  # Ensure you import the model
+
+def export_issues_csv(request):
+    if not (request.user.is_authenticated and request.user.is_superuser):
+        return HttpResponse("You do not have permission to access this page.", status=403)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="issues.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Complaint ID', 'Project Name', 'email', 'Reporter', 'Issue Title', 'Description', 'rootcause', 'priority', 'Status', 'Reported Date', 'Reported Time', 'Assigned To', 'Assigned on'])
+
+    issues = IncidentIssue.objects.select_related('reporter', 'assigned_to')
+
+    for issue in issues:
+        writer.writerow([
+            issue.custom_id,
+            issue.company_name,
+            issue.email,
+            issue.reporter.username,
+            issue.issue,
+            issue.description,
+            issue.root_cause,
+            issue.priority,
+            issue.status,
+            issue.report_date,
+            issue.report_time,
+            issue.assigned_to.username if issue.assigned_to else "Unassigned",
+            issue.assigned_date if issue.assigned_to else "Unassigned"
+        ])
+
+    return response
