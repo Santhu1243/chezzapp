@@ -608,7 +608,6 @@ def update_rootcause(request, issue_id):
         # Get the logged-in staff member
         staff_user = request.user
 
-        # Get all super admin users (assuming is_superuser field in Django User model)
         super_admins = User.objects.filter(is_superuser=True).values_list('email', flat=True)
 
         # Send email notification
@@ -685,37 +684,26 @@ def get_user_group(self):
 User.add_to_class("group_name", property(get_user_group))
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .forms import ProfileForm 
-from .models import Profile
 
-@login_required
-def profile_page(request):
-    user = request.user
 
-    # Determine which base template to use
-    if user.is_superuser:
-        base_template = "superuser-base.html"
-    elif user.is_staff:
-        base_template = "admin-base.html"
-    else:
-        base_template = "base.html"
+# @login_required
+# def profile_page(request):
+#     user = request.user
 
-    # Get user's groups
-    groups = user.groups.all()
+#     # Ensure the profile exists
+#     profile, created = Profile.objects.get_or_create(user=user)
 
-    return render(
-        request,
-        "account/profile.html",
-        {
-            "user": user,
-            "groups": groups,
-            "base_template": base_template,
-            "is_superuser": user.is_superuser,
-            "is_staff": user.is_staff,
-        },
-    )
+#     base_template = "superuser-base.html" if user.is_superuser else "admin-base.html" if user.is_staff else "base.html"
+
+#     return render(
+#         request,
+#         "account/profile.html",
+#         {
+#             "user": user,
+#             "profile": profile,
+#             "base_template": base_template,
+#         },
+#     )
 
 
 def all_data(request):
@@ -776,3 +764,54 @@ def export_issues_csv(request):
         ])
 
     return response
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Profile
+from .forms import UserUpdateForm, ProfileUpdateForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+
+@login_required
+def profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        print("FILES RECEIVED:", request.FILES)  # Debugging
+
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile = profile_form.save(commit=False)  # Delay saving
+
+            if 'profile_picture' in request.FILES:
+                profile.profile_picture = request.FILES['profile_picture']
+                
+            profile.save()  # Now save the profile
+            return redirect('/')
+
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=profile)
+
+    return render(request, "account/profile.html", {
+        "profile": profile, 
+        "user_form": user_form, 
+        "profile_form": profile_form
+    })
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Keep user logged in after password change
+            return redirect('profile')  # Redirect to profile after password update
+    else:
+        form = PasswordChangeForm(request.user)
+        
+    return render(request, 'account/change_password.html', {'form': form})
