@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
-{% load static %} <!-- ✅ Add this line -->
+{% load static %}
 
 {% block start %}
+<style>
+nav.navbar {
+    display: none;
+}
+</style>
 <div class="container">
     <div class="profile-container text-center">
         <h2>{{ profile.user.username }}'s Profile</h2>
