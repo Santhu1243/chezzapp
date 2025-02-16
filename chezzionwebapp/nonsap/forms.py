@@ -16,7 +16,7 @@ class IncidentIssueForm(forms.ModelForm):
 
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'reporter', 'company_name', 'resolutionDate', 'priority']
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'reporter', 'company_name',  'priority']
 
     def clean_reporter(self):  # sourcery skip: raise-from-previous-error
         """ Custom validation for the reporter field. """
