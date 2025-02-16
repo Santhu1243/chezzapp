@@ -19,12 +19,19 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
+                    {% if request.user.groups.all|length > 1 %}
+                    <select name="company_name" id="user-company" class="form-control text-uppercase fw-bold" required>
+                        {% for group in request.user.groups.all %}
+                        <option value="{{ group.name }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
                     <input type="text" name="company_name" id="user-company" class="form-control text-uppercase fw-bold"
                         value="{{ request.user.groups.first.name }}" placeholder="{{ request.user.groups.first.name }}"
                         required readonly>
-
-
+                    {% endif %}
                 </div>
+
             </div>
             <!-- Issue Field -->
             <div class="form-group d-md-flex mt-5">

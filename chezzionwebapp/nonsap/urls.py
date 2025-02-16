@@ -5,7 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import path
-from .views import all_data, export_issues_csv  # Ensure this import exists
+from .views import all_data, export_issues_csv  
+from .views import profile, change_password
+
 
 app_name = 'nonsap'
 
@@ -38,11 +40,12 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('update_rootcause/<int:issue_id>/', views.update_rootcause, name='update_rootcause'),
     path('update_priority/<int:issue_id>/', views.update_priority, name='update_priority'),
-    path('profile/', views.profile_page, name='profile_page'),
+    path('profile/', profile, name='profile'),
     path("pwa/", include("pwa.urls")),
     path("", include("pwa.urls")), 
     path("superuser/all/", views.all_data, name='all_data'),
     path('export-issues-csv/', export_issues_csv, name='export_issues_csv'),
+    path('profile/change-password/', change_password, name='change_password'),
 
 
 ]
