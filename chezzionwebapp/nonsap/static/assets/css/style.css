@@ -235,6 +235,7 @@ li.no-comments {
 
 a {
     color: #003986;
+    text-decoration: none !important;
 }
 
 .staff-bg {
@@ -299,4 +300,13 @@ img.img-fluid.rotate-img {
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #007bff;
+}
+
+.box.bg-primary {
+    background: #002d86 !important;
+}
+
+a.box.active {
+    border: 2px solid white;
+    box-shadow: 1px 1px 10px 1px black;
 }
