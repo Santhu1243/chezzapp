@@ -78,8 +78,7 @@
                                 <i class="fa-solid fa-user"></i> {{ request.user.username }}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><a class="dropdown-item" href="#">Change Password</a></li>
+                                <li><a class="dropdown-item" href="{% url 'nonsap:profile' %}">Profile</a></li>
                                 <li>
                                     <form method="POST" action="{% url 'nonsap:logout' %}"
                                         class="d-flex align-items-center" id="logout-form">

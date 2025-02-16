@@ -4,7 +4,9 @@
 {% if user.is_authenticated and user.is_superuser %}
 <div class="container">
     <h4>Hello, <span class="text-bold">{{ user.username }}</span></h4>
-
+    <div class="container">
+        {% include 'master/partials/data-box.html' %}
+    </div>
     <div class="table-responsive d-none d-lg-block d-sm-none">
         <table id="issuesTable" class="table table-striped">
             <thead>
@@ -34,12 +36,12 @@
                     </td>
                     <td>{{ issue.issue }}</td>
                     <td>{% if issue.status == "resolved" %}
-                            Resolved by {{ issue.assigned_to.username }}
+                        Resolved by {{ issue.assigned_to.username }}
                         {% else %}
-                            {% include 'master/partials/status_update_form.html' %}
+                        {% include 'master/partials/status_update_form.html' %}
                         {% endif %}
 
-                   </td>
+                    </td>
                     <td data-type="date">{{ issue.report_date }}</td>
                     <td>{% if issue.assigned_to %}
                         Assigned to {{ issue.assigned_to.username }}
@@ -73,22 +75,23 @@
                 <p class="card-text"><strong>Issue Title:</strong> {{ issue.issue }}</p>
                 <p class="card-text"><strong>Status:</strong></p>
                 {% if issue.status == "Resolved" %}
-                    Resolved by {{ issue.assigned_to.username }}
+                Resolved by {{ issue.assigned_to.username }}
                 {% else %}
-                   {% include 'master/partials/status_update_form.html' %}
+                {% include 'master/partials/status_update_form.html' %}
                 {% endif %}
 
                 <p class="card-text"><strong>Reported on:</strong> {{ issue.report_date }}</p>
+                <p class="card-text"><strong>Reported Time:</strong> {{ issue.report_time }}</p>
                 <p class="card-text"><strong>Assigned To:</strong>
-                {% if issue.status == "Resolved" %}
+                    {% if issue.status == "Resolved" %}
                     Resolved by {{ issue.assigned_to.username }}
-                {% else %}
-                    {% if issue.assigned_to %}
-                        Assigned to {{ issue.assigned_to.username }}
                     {% else %}
-                        {% include 'master/partials/assign_staff_form.html' %}
+                    {% if issue.assigned_to %}
+                    Assigned to {{ issue.assigned_to.username }}
+                    {% else %}
+                    {% include 'master/partials/assign_staff_form.html' %}
                     {% endif %}
-                {% endif %}
+                    {% endif %}
                 </p>
                 <a class="btn btn-primary mb-2 w-100 " href="{% url 'nonsap:view_issue' issue.id %}">View Status</a>
                             </div>

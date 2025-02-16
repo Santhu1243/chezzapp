@@ -126,13 +126,18 @@
 
     <script>
         $(document).ready(function () {
-            // Get the current date 
             var currentDate = new Date();
-            $('#reportdatepicker').val(new Date().toLocaleDateString('en-GB'));
+
+            // Format date as 'YYYY-MM-DD' for Bootstrap Datepicker
+            let formattedDate = currentDate.getFullYear() + '-' +
+                ('0' + (currentDate.getMonth() + 1)).slice(-2) + '-' +
+                ('0' + currentDate.getDate()).slice(-2);
+
+            $('#reportdatepicker').val(formattedDate);
             $('#reportdatepicker').datepicker({
                 autoclose: true,
                 todayHighlight: true,
-                format: 'yyyy-mm-dd',
+                format: 'yyyy-mm-dd',  // Ensure format matches input value
                 startDate: currentDate,
             });
 

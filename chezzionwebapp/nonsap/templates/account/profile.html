@@ -1,21 +1,53 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
+{% block start %}
+<style>
+nav.navbar {
+    display: none;
+}
+</style>
 <div class="container">
-    <h2>Profile Page</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="bio">Bio:</label>
-            <textarea id="bio" name="bio" class="form-control">{{ form.bio.value }}</textarea>
-        </div>
+    <div class="profile-container text-center">
+        <h2>{{ profile.user.username }}'s Profile</h2>
+        <p>Email: {{ profile.user.email }}</p>
 
-        <div class="form-group">
-            <label for="profile_picture">Profile Picture:</label>
-            <input type="file" name="profile_picture" class="form-control" id="profile_picture">
-        </div>
+        <!-- Profile Picture -->
 
-        <button type="submit" class="btn btn-primary">Update Profile</button>
-    </form>
+
+        <!-- Form for Uploading Profile Picture -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="coontainer">
+                <div class="mb-3">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="profile-img">
+                    {% else %}
+                    <img src="{% static 'assets/img/default.png' %}" alt="DefaultProfile" class="profile-img">
+                    {% endif %}
+                </div>
+                <input type="file" name="profile_picture" class="form-control mb-3 visually-hidden">
+
+                <button type="submit" class="btn btn-primary visually-hidden">Upload </button>
+            </div>
+        </form>
+        <!-- Change Password Form -->
+        <div class="group-div">
+            <p>Company:
+                {% if user.groups.all %}
+                {% for group in user.groups.all %}
+                {{ group.name }}
+                {% endfor %}
+                {% else %}
+                No Company Assigned
+                {% endif %}
+            </p>
+        </div>
+        <div class="mt-4">
+            <h5>Change Password</h5>
+            {% include 'account/change_password.html' %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}

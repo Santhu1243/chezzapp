@@ -235,6 +235,7 @@ li.no-comments {
 
 a {
     color: #003986;
+    text-decoration: none !important;
 }
 
 .staff-bg {
@@ -277,13 +278,34 @@ img.img-fluid.rotate-img {
     object-fit: cover;
     animation: rotate 5s cubic-bezier(0.33, 0.27, 0.69, 0.76) infinite;
 }
-<<<<<<< HEAD
-td.reassign {
-    display: flex;
-}
-=======
 
 .reassign {
     display: flex;
 }
->>>>>>> 9537619dcda39a13366449f6132b5be1c8a54af9
+
+/* profile */
+.profile-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff;
+}
+
+.box.bg-primary {
+    background: #002d86 !important;
+}
+
+a.box.active {
+    border: 2px solid white;
+    box-shadow: 1px 1px 10px 1px black;
+}

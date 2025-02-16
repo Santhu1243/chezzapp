@@ -145,6 +145,8 @@ def superadmin_dashboard(request):
 
 # Incident Issue form handling view
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -222,19 +224,36 @@ def success(request, issue_id):
 
 
 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.db.models import Q
+from .models import IncidentIssue  # Import your model
+
 @login_required
 def dashboard_view(request):
+    status_filter = request.GET.get('status', 'all')  # Get the status from the URL
+
     # Fetch issues reported by the logged-in user
-    issues = IncidentIssue.objects.filter(reporter=request.user)
-    paginator = Paginator(issues, 5) 
+    issues = IncidentIssue.objects.filter(reporter=request.user).order_by('-report_date', '-report_time') 
+
+    # Apply filtering based on status
+    if status_filter == 'active':
+        issues = issues.filter(status='active')
+    elif status_filter == 'inprogress':
+        issues = issues.filter(status='inprogress')
+    elif status_filter == 'resolved':
+        issues = issues.filter(status='resolved')
+
+    # Pagination
+    paginator = Paginator(issues, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # Count statistics
-    total_issues = issues.count()
-    active_issues = issues.filter(Q(status='active') | Q(status='inprogress')).count()
-    # active_issues = issues.filter(status='active').count()
-    resolved_issues = issues.filter(status='resolved').count()
+    total_issues = IncidentIssue.objects.filter(reporter=request.user).count()
+    active_issues = IncidentIssue.objects.filter(reporter=request.user, status__in=['active', 'inprogress']).count()
+    resolved_issues = IncidentIssue.objects.filter(reporter=request.user, status='resolved').count()
 
     # Render template
     return render(
@@ -246,6 +265,7 @@ def dashboard_view(request):
             'total_issues': total_issues,
             'active_issues': active_issues,
             'resolved_issues': resolved_issues,
+            'status_filter': status_filter  # Pass the filter to the template
         }
     )
 
@@ -254,15 +274,32 @@ def dashboard_view(request):
 
 
 
-
+@login_required
 def superadmin_dashboard(request):
     if request.user.is_authenticated and request.user.is_superuser:
+        status_filter = request.GET.get('status', 'all')  # Get the filter from URL
+
         issues = (
             IncidentIssue.objects.select_related('reporter', 'assigned_to')
             .annotate(reporter_name=F('reporter__username'), assigned_to_name=F('assigned_to__username'))
-        )
+        ).order_by('-report_date', '-report_time')
+
+        if status_filter == 'active':
+            issues = issues.filter(status='active')
+        elif status_filter == 'inprogress':
+            issues = issues.filter(status='inprogress')
+        elif status_filter == 'resolved':
+            issues = issues.filter(status='resolved')
+        # If 'all', don't filter issues (default case)
+
         staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
-        status_choices = Issue._meta.get_field('status').choices
+        status_choices = IncidentIssue._meta.get_field('status').choices
+
+        # Count statistics
+        total_issues = IncidentIssue.objects.count()
+        active_issues = IncidentIssue.objects.filter(Q(status='active') | Q(status='inprogress')).count()
+        resolved_issues = IncidentIssue.objects.filter(status='resolved').count()
+        inprogress_issues = IncidentIssue.objects.filter(status='inprogress').count()
 
         # Pagination logic
         paginator = Paginator(issues, 10)  # Show 10 issues per page
@@ -273,11 +310,17 @@ def superadmin_dashboard(request):
             'issues': page_obj,
             'staff_members': staff_members,
             'status_choices': status_choices,
+            'total_issues': total_issues,
+            'active_issues': active_issues,
+            'resolved_issues': resolved_issues,
+            'inprogress_issues': inprogress_issues,
+            'status_filter': status_filter,  # Send filter state to template
         }
         
         return render(request, 'master/superadmin_dashboard.html', context)
-    
+
     return render(request, 'master/access_denied.html', status=403)
+
 
 
 def issue_list(request):
@@ -614,7 +657,6 @@ def update_rootcause(request, issue_id):
         # Get the logged-in staff member
         staff_user = request.user
 
-        # Get all super admin users (assuming is_superuser field in Django User model)
         super_admins = User.objects.filter(is_superuser=True).values_list('email', flat=True)
 
         # Send email notification
@@ -691,37 +733,26 @@ def get_user_group(self):
 User.add_to_class("group_name", property(get_user_group))
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .forms import ProfileForm 
-from .models import Profile
 
-@login_required
-def profile_page(request):
-    user = request.user
 
-    # Determine which base template to use
-    if user.is_superuser:
-        base_template = "superuser-base.html"
-    elif user.is_staff:
-        base_template = "admin-base.html"
-    else:
-        base_template = "base.html"
+# @login_required
+# def profile_page(request):
+#     user = request.user
 
-    # Get user's groups
-    groups = user.groups.all()
+#     # Ensure the profile exists
+#     profile, created = Profile.objects.get_or_create(user=user)
 
-    return render(
-        request,
-        "account/profile.html",
-        {
-            "user": user,
-            "groups": groups,
-            "base_template": base_template,
-            "is_superuser": user.is_superuser,
-            "is_staff": user.is_staff,
-        },
-    )
+#     base_template = "superuser-base.html" if user.is_superuser else "admin-base.html" if user.is_staff else "base.html"
+
+#     return render(
+#         request,
+#         "account/profile.html",
+#         {
+#             "user": user,
+#             "profile": profile,
+#             "base_template": base_template,
+#         },
+#     )
 
 
 def all_data(request):
@@ -782,3 +813,54 @@ def export_issues_csv(request):
         ])
 
     return response
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Profile
+from .forms import UserUpdateForm, ProfileUpdateForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+
+@login_required
+def profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        print("FILES RECEIVED:", request.FILES)  # Debugging
+
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile = profile_form.save(commit=False)  # Delay saving
+
+            if 'profile_picture' in request.FILES:
+                profile.profile_picture = request.FILES['profile_picture']
+                
+            profile.save()  # Now save the profile
+            return redirect('/')
+
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=profile)
+
+    return render(request, "account/profile.html", {
+        "profile": profile, 
+        "user_form": user_form, 
+        "profile_form": profile_form
+    })
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Keep user logged in after password change
+            return redirect('profile')  # Redirect to profile after password update
+    else:
+        form = PasswordChangeForm(request.user)
+        
+    return render(request, 'account/change_password.html', {'form': form})

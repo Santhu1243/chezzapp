@@ -72,11 +72,30 @@ class SuperAdminLoginForm(forms.Form):
     username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"class": "form-control"}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}))
 
+
 from django import forms
+from django.contrib.auth.models import User
 from .models import Profile
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['profile_picture', 'address' , 'phone' ]  # Ensure profile_picture is included
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['profile_picture'].required = False  # Allow empty file
+
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'profile_picture']  # Fields you want the user to update
-
+        fields = '__all__'  # Adjust fields as necessary
