@@ -18,15 +18,7 @@
     <div class="form-group d-md-flex">
         <div class="col-md-9 col-sm-12 mt-2">
             <input type="number" id="days" name="days" class="form-control" placeholder="Enter custom days"
-                value="{{ issue.custom_days }}" {% if issue.priority != 'P4' %}disabled{% endif %}>
-        </div>
-    </div>
-
-    <!-- Resolution Time Input -->
-    <div class="form-group d-md-flex">
-        <div class="col-md-9 col-sm-12 mt-2">
-            <input type="text" id="resolution_time" name="resolution_time" class="form-control"
-                placeholder="Enter Time" value="{{ issue.resolution_time }}" {% if issue.priority != 'P4' and issue.priority != 'P0' %}disabled{% endif %}>
+                value="{{ issue.resolution_days }}" {% if issue.priority != 'P4' %}disabled{% endif %}>
         </div>
     </div>
 
@@ -34,105 +26,90 @@
     <div class="form-group d-md-flex">
         <div class="col-md-9 col-sm-12">
             <label for="resolutionDate">Resolution Date</label>
-            <input type="text" id="resolutionDate" name="resol_date" class="form-control" readonly
-                value="{{ resolution_date }}">
+            <input type="text" id="resolutionDate" name="resolutionDate" class="form-control" readonly
+                value="{{ issue.resolutionDate|default:'' }}">
         </div>
     </div>
+
+    <!-- Resolution Time Input -->
+    <div class="form-group d-md-flex">
+    <div class="col-md-9 col-sm-12 mt-2">
+        <input type="text" id="resolution_time" name="resolution_time" class="form-control"
+    value="{{ issue.resolutionTime|default:'' }}">
+
+    </div>
+</div>
 
     <!-- Submit Button -->
     <button type="submit" class="btn btn-primary mt-4">Update Priority</button>
 </form>
-
-<!-- jQuery and Timepicker Plugin -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
 
 <script>
- $(document).ready(function () {
-    // Get current time
-    var currentTime = new Date();
-    var hours = currentTime.getHours();
-    var minutes = currentTime.getMinutes();
+$(document).ready(function () {
+    let priorityDaysMapping = {
+        "P0": 0,
+        "P1": 1,
+        "P2": 3,
+        "P3": 7,
+        "P4": null
+    };
 
-    // Format the current time in HH:mm format
-    var currentTimeFormatted = (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes);
-
-    // Initialize timepicker with dynamic minTime based on the current time
     $('#resolution_time').timepicker({
-        timeFormat: 'HH:mm',
+        timeFormat: 'HH:mm A',
         interval: 15,
-        minTime: currentTimeFormatted, // Disable past times
         maxTime: '23:59',
         dynamic: true,
         dropdown: true,
         scrollbar: true
     });
 
-    // Function to update fields based on the selected priority
     function updateFields() {
         let selectedPriority = $('#priority').val();
         let daysInput = $('#days');
         let resolutionTimeInput = $('#resolution_time');
         let resolutionDateInput = $('#resolutionDate');
 
-        // Predefined priority-to-days mapping
-        let priorityDaysMapping = {
-            "PO": 0,  // Critical (PO) - Resolve today
-            "P0": 0,  // Critical (P0) - Resolve today
-            "P1": 1,  // 1 day for P1
-            "P2": 3,  // 3 days for P2
-            "P3": 7,  // 7 days for P3
-            "P4": null // Custom days (user input)
-        };
-
-        // Handling the "P4" priority separately for custom days input
         if (selectedPriority === "P4") {
-            daysInput.prop('disabled', false); // Enable custom days input
-            resolutionTimeInput.prop('disabled', false); // Enable time input
+            daysInput.prop('disabled', false);
+            resolutionTimeInput.prop('disabled', false);
         } else {
-            daysInput.prop('disabled', true); // Disable custom days input
-            daysInput.val(priorityDaysMapping[selectedPriority] || ""); // Set predefined days
+            daysInput.prop('disabled', true);
+            daysInput.val(priorityDaysMapping[selectedPriority] || "");
         }
 
-        // If "PO" or "P0" (Critical) is selected, enable time input and set resolution date to today
         if (selectedPriority === "PO" || selectedPriority === "P0") {
-            resolutionTimeInput.prop('disabled', false); // Enable time input
-            setResolutionDateToToday(); // Set resolution date to today
+            resolutionTimeInput.prop('disabled', false);
+            setResolutionDateToToday();
         } else {
-            resolutionTimeInput.prop('disabled', true); // Disable time input for other priorities
-            updateResolutionDate(); // Update resolution date based on priority
+            resolutionTimeInput.prop('disabled', true);
+            updateResolutionDate();
         }
     }
 
-    // Function to update the resolution date based on priority and custom days
     function updateResolutionDate() {
         let selectedPriority = $('#priority').val();
         let daysToAdd = selectedPriority === "P4" ? parseInt($('#days').val()) || 0 : priorityDaysMapping[selectedPriority];
 
         if (daysToAdd === null) {
-            $('#resolutionDate').val(""); // Reset resolution date if no days to add
+            $('#resolutionDate').val("");
             return;
         }
 
         let currentDate = new Date();
         currentDate.setDate(currentDate.getDate() + daysToAdd);
-        $('#resolutionDate').val(currentDate.toISOString().split("T")[0]); // Format to YYYY-MM-DD
+        $('#resolutionDate').val(currentDate.toISOString().split("T")[0]);
     }
 
-    // Function to set the resolution date to today
     function setResolutionDateToToday() {
-        let today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD
-        $('#resolutionDate').val(today);
+        $('#resolutionDate').val(new Date().toISOString().split("T")[0]);
     }
 
-    // Event listeners
     $('#priority').on('change', updateFields);
     $('#days').on('input', updateResolutionDate);
 
-    // Initialize fields on page load
     updateFields();
 });
-
-
 </script>

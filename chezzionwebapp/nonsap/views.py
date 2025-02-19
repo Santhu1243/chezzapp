@@ -705,12 +705,24 @@ def update_rootcause(request, issue_id):
 
 
 
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now
+from .models import IncidentIssue
+
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now
+from .models import IncidentIssue
+
 def update_priority(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
     if request.method == 'POST':
         priority = request.POST.get('priority')
         resolution_days = request.POST.get('days')
+        resolution_time = request.POST.get('resolution_time')
+        resolution_date = request.POST.get('resolutionDate')  # Get resolution date from form
 
         try:
             resolution_days = int(resolution_days) if resolution_days else 0
@@ -720,21 +732,39 @@ def update_priority(request, issue_id):
         issue.priority = priority
         issue.resolution_days = resolution_days
 
-        if resolution_days > 0:
-            issue.resolution_date = now().date() + timedelta(days=resolution_days)
+        # Update resolutionDate
+        if resolution_date:
+            try:
+                issue.resolutionDate = datetime.strptime(resolution_date, "%Y-%m-%d").date()
+            except ValueError:
+                issue.resolutionDate = None
+        elif resolution_days > 0:
+            issue.resolutionDate = now().date() + timedelta(days=resolution_days)
         else:
-            issue.resolution_date = None
+            issue.resolutionDate = None
 
-        # Debugging outputs
+        # Debugging prints
         print(f"Priority: {priority}")
         print(f"Resolution Days: {resolution_days}")
-        print(f"Resolution Date: {issue.resolution_date}")
+        print(f"Resolution Date (Form Input): {resolution_date}")
+        print(f"Computed Resolution Date: {issue.resolutionDate}")
+
+        # Update resolutionTime
+        if resolution_time:
+            try:
+                issue.resolutionTime = datetime.strptime(resolution_time, "%H:%M").time()
+            except ValueError:
+                issue.resolutionTime = None
+
+        print(f"Resolution Time: {issue.resolutionTime}")  # Debugging
 
         issue.save()
 
         return redirect('nonsap:view_issue', issue_id=issue.id)
 
     return render(request, 'master/view-details.html', {'issue': issue})
+
+
 
 
 

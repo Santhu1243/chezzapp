@@ -42,8 +42,8 @@ class IncidentIssue(models.Model):
          default='active',
      )
     company_name = models.CharField(max_length=255, default="unknown")
-    resolutionDate = models.DateField(null=True)
-    resolutionTime = models.TimeField(null=True)
+    resolutionDate = models.DateField(null=True, blank=True)  
+    resolutionTime = models.TimeField(null=True, blank=True)
     status_changed_at = models.DateTimeField(auto_now=True)  
 
     
