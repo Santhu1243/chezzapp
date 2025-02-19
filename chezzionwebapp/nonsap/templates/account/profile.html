@@ -3,9 +3,9 @@
 
 {% block start %}
 <style>
-nav.navbar {
-    display: none;
-}
+    nav.navbar {
+        display: none;
+    }
 </style>
 <div class="container">
     <div class="profile-container text-center">
@@ -31,23 +31,32 @@ nav.navbar {
                 <button type="submit" class="btn btn-primary visually-hidden">Upload </button>
             </div>
         </form>
-        <!-- Change Password Form -->
         <div class="group-div">
-            <p>Company:
+            <p><span class="text-dark fw-bold">Company:</span>
                 {% if user.groups.all %}
                 {% for group in user.groups.all %}
-                {{ group.name }}
+                {{ group.name }},
                 {% endfor %}
                 {% else %}
                 No Company Assigned
                 {% endif %}
             </p>
         </div>
-        <div class="mt-4">
-            <h5>Change Password</h5>
-            {% include 'account/change_password.html' %}
-        </div>
-    </div>
+        <div class="group-div">
+            {% if user.is_superuser %}
+            <p><strong>Role:</strong> <span class="text-dark fw-bold"> Superadmin </span></p>
+            {% if user.is_staff and not user.is_superuser %}
+            <p><strong>Role:</strong> <span class="text-dark fw-bold">Consultant </span></p>
+            {% endif %}
+            {% else %}
+            <p> <strong>Role:</strong> <span class="text-dark fw-bold">User </span></p>
+            {% endif %}
 
-</div>
-{% endblock %}
+        </div>
+        <div class="group-div">
+            <p><span class="text-dark fw-bold">Password :</span> <a href="{% url 'nonsap:change_password' %}">Change
+                    password</a></p>
+        </div>
+
+    </div>
+    {% endblock %}
