@@ -27,6 +27,7 @@ from django.db.models import F
 from .forms import StaffLoginForm, SuperAdminLoginForm
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
+from datetime import timedelta  # Add this import
 
 # Home view
 @login_required
@@ -269,7 +270,7 @@ def dashboard_view(request):
 
 
 @login_required
-def superadmin_dashboard(request):
+def superadmin_dashboard(request):  # sourcery skip: last-if-guard
     if request.user.is_authenticated and request.user.is_superuser:
         status_filter = request.GET.get('status', 'all')  # Get the filter from URL
 
@@ -420,7 +421,7 @@ def assign_staff(request, issue_id):  # sourcery skip: use-named-expression
 
 def assign_staff_to_issue(staff, issue):
     # Assign the staff member to the issue
-    issue.assigned_to = staff  # Assuming you have an 'assigned_to' field in your model
+    issue.assigned_to = staff  
     issue.save()
 
 
@@ -450,43 +451,40 @@ def assigned_complaints(request):
 
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import IncidentIssue, Comment
-from .forms import CommentForm
-from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
+from django.utils.html import strip_tags
+from django.conf import settings
 
 def common_view(request, issue_id, template_name):
-    # Fetch the issue object
     issue = get_object_or_404(IncidentIssue, id=issue_id)
-    # Fetch attachments
     attachments = issue.attachments.all()
     staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
-    status_choices = Issue._meta.get_field('status').choices
+    status_choices = IncidentIssue._meta.get_field('status').choices
+    priority_choices = IncidentIssue._meta.get_field('priority').choices 
 
-    # Handle form submission
+
     if request.method == "POST":
         form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.issue = issue
             comment.commented_by = request.user
-            
+
             if form.cleaned_data.get('comment_text') or form.cleaned_data.get('image'):
                 comment.save()
+
+                # Send email notification
+                send_comment_notification(issue, comment)
+
         else:
-            print("Form errors:", form.errors)  # Log errors here if necessary
-        
+            print("Form errors:", form.errors)
+
     else:
         form = CommentForm()
 
-    # Fetch comments
     comments = issue.comments.all()
-
-    # Pagination logic
-    paginator = Paginator(comments, 5)  # Show 5 comments per page
+    paginator = Paginator(comments, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -500,12 +498,40 @@ def common_view(request, issue_id, template_name):
             'form': form,
             'comments': comments,
             'page_obj': page_obj,
-            'priority_choices': Issue.PRIORITY_CHOICES,
+            'priority_choices': priority_choices,
             'status_choices': status_choices,
-
-              
         }
     )
+
+def send_comment_notification(issue, comment):
+    """Send email notification on new comment"""
+    
+    subject = f"New Comment on Issue #{issue.id}"
+    message = f"""
+    A new message has been added by {comment.commented_by.username}:
+
+    "{comment.comment_text}"
+
+
+    Regards,
+    {comment.commented_by.username}
+    """
+    
+    # Fetch recipients
+    reporter_email = issue.reporter.email if issue.reporter else None
+    superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+    assigned_staff_email = issue.assigned_to.email if issue.assigned_to else None
+
+    recipient_list = list(superuser_emails)
+    if reporter_email:
+        recipient_list.append(reporter_email)
+    if assigned_staff_email:
+        recipient_list.append(assigned_staff_email)
+
+    # Send email
+    if recipient_list:
+        send_mail(subject, strip_tags(message), settings.DEFAULT_FROM_EMAIL, recipient_list)
+
 
 @login_required
 def view_details(request, issue_id):
@@ -529,6 +555,8 @@ from django.shortcuts import get_object_or_404, render
 
 
 
+from django.utils.timezone import now
+
 @login_required
 def update_status(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
@@ -539,27 +567,33 @@ def update_status(request, issue_id):
     if request.method == "POST":
         new_status = request.POST.get('status')
 
-        # Check if the status is valid
         if new_status and new_status in dict(STATUS_CHOICES):
             old_status = issue.status
-            issue.status = new_status
-            issue.save()
+            
+            # Update status and timestamp
+            if issue.status != new_status:  # Only update timestamp if status changes
+                issue.status = new_status
+                issue.status_changed_at = now()
+                issue.save()
 
-            # Send email notifications for the status change
-            send_status_change_email(issue, old_status, new_status)
+                # Send email notifications
+                send_status_change_email(issue, old_status, new_status)
 
-            messages.success(request, f"Status for issue #{issue_id} updated to '{dict(STATUS_CHOICES)[new_status]}'.")
+                messages.success(request, f"Status for issue #{issue_id} updated to '{dict(STATUS_CHOICES)[new_status]}'.")
+            else:
+                messages.info(request, "No changes detected in status.")
 
         else:
             messages.error(request, "Invalid status value.")
 
-    # 🔹 Redirect based on user type
+    # Redirect based on user type
     if request.user.is_superuser:
-        return redirect('nonsap:view_issue', issue_id=issue.id)  # Redirect superadmin to dashboard
+        return redirect('nonsap:view_issue', issue_id=issue.id)
     elif request.user.is_staff:
-        return redirect('nonsap:view_details', issue_id=issue.id)  # Redirect staff to issue details
+        return redirect('nonsap:view_details', issue_id=issue.id)
 
-    return redirect('nonsap:home')  # Fallback redirection
+    return redirect('nonsap:home')
+
 
 
 
@@ -671,12 +705,24 @@ def update_rootcause(request, issue_id):
 
 
 
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now
+from .models import IncidentIssue
+
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now
+from .models import IncidentIssue
+
 def update_priority(request, issue_id):
     issue = get_object_or_404(IncidentIssue, id=issue_id)
 
     if request.method == 'POST':
         priority = request.POST.get('priority')
         resolution_days = request.POST.get('days')
+        resolution_time = request.POST.get('resolution_time')
+        resolution_date = request.POST.get('resolutionDate')  # Get resolution date from form
 
         try:
             resolution_days = int(resolution_days) if resolution_days else 0
@@ -686,21 +732,39 @@ def update_priority(request, issue_id):
         issue.priority = priority
         issue.resolution_days = resolution_days
 
-        if resolution_days > 0:
-            issue.resolution_date = now().date() + timedelta(days=resolution_days)
+        # Update resolutionDate
+        if resolution_date:
+            try:
+                issue.resolutionDate = datetime.strptime(resolution_date, "%Y-%m-%d").date()
+            except ValueError:
+                issue.resolutionDate = None
+        elif resolution_days > 0:
+            issue.resolutionDate = now().date() + timedelta(days=resolution_days)
         else:
-            issue.resolution_date = None
+            issue.resolutionDate = None
 
-        # Debugging outputs
+        # Debugging prints
         print(f"Priority: {priority}")
         print(f"Resolution Days: {resolution_days}")
-        print(f"Resolution Date: {issue.resolution_date}")
+        print(f"Resolution Date (Form Input): {resolution_date}")
+        print(f"Computed Resolution Date: {issue.resolutionDate}")
+
+        # Update resolutionTime
+        if resolution_time:
+            try:
+                issue.resolutionTime = datetime.strptime(resolution_time, "%H:%M").time()
+            except ValueError:
+                issue.resolutionTime = None
+
+        print(f"Resolution Time: {issue.resolutionTime}")  # Debugging
 
         issue.save()
 
         return redirect('nonsap:view_issue', issue_id=issue.id)
 
     return render(request, 'master/view-details.html', {'issue': issue})
+
+
 
 
 
@@ -726,27 +790,6 @@ def get_user_group(self):
 
 User.add_to_class("group_name", property(get_user_group))
 
-
-
-
-# @login_required
-# def profile_page(request):
-#     user = request.user
-
-#     # Ensure the profile exists
-#     profile, created = Profile.objects.get_or_create(user=user)
-
-#     base_template = "superuser-base.html" if user.is_superuser else "admin-base.html" if user.is_staff else "base.html"
-
-#     return render(
-#         request,
-#         "account/profile.html",
-#         {
-#             "user": user,
-#             "profile": profile,
-#             "base_template": base_template,
-#         },
-#     )
 
 
 def all_data(request):
@@ -853,8 +896,120 @@ def change_password(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)  # Keep user logged in after password change
-            return redirect('profile')  # Redirect to profile after password update
+            return redirect('nonsap:profile')  # Redirect to profile after password update
     else:
         form = PasswordChangeForm(request.user)
         
     return render(request, 'account/change_password.html', {'form': form})
+
+
+
+
+import csv
+import chardet
+from datetime import datetime
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from .models import IncidentIssue
+from .forms import IssueUploadForm
+
+def upload_issues(request):
+    if request.method == "POST":
+        print("File Upload Attempted")
+        form = IssueUploadForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            print("Form is valid")
+            csv_file = request.FILES['csv_file']
+            print(f"Uploaded File: {csv_file.name}, Size: {csv_file.size} bytes")
+
+            # Detect file encoding
+            raw_data = csv_file.read()
+            detected_encoding = chardet.detect(raw_data)['encoding'] or 'utf-8'
+            csv_file.seek(0)  # Reset file pointer after reading
+
+            try:
+                # Decode file using detected encoding
+                decoded_file = raw_data.decode(detected_encoding).splitlines()
+                reader = csv.reader(decoded_file)
+
+                for row in reader:
+                    try:
+                        # Convert date formats if needed
+                        report_date = convert_date(row[3])
+                        assigned_date = convert_date(row[10])
+                        resolution_date = convert_date(row[14])
+
+                        # Handle ForeignKey fields properly
+                        reporter = get_user(row[7])
+                        assigned_to = get_user(row[9])
+
+                        IncidentIssue.objects.create(
+                            issue=row[0],
+                            description=row[1],
+                            email=row[2],
+                            report_date=convert_date(row[3]),
+                            report_time=convert_time(row[4]),
+                            attachment=row[5] if row[5] else None,  
+                            root_cause=row[6],
+                            reporter=get_user(row[7]) or request.user,
+                            status=row[8],
+                            assigned_to=assigned_to,
+                            assigned_date=assigned_date,
+                            custom_id=row[11],
+                            priority=row[12],
+                            company_name=row[13],
+                            resolutionDate=resolution_date
+                        )
+                    
+                    except ValueError as e:
+                        print(f"Skipping row due to error: {e}")
+                        continue
+
+                return redirect('issue_list')
+
+            except UnicodeDecodeError as e:
+                print(f"Failed to decode file with {detected_encoding}: {e}")
+                return render(request, 'incident-management/upload_issues.html', {'form': form, 'error': 'Failed to decode the CSV file.'})
+
+    else:
+        form = IssueUploadForm()
+
+    return render(request, 'incident-management/upload_issues.html', {'form': form})
+
+
+def convert_date(date_str):
+    """Convert date from DD/MM/YYYY or other formats to YYYY-MM-DD."""
+    if not date_str or date_str.strip() == "":
+        return None  # Handle empty dates
+    
+    for fmt in ("%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d"):  # Adjust formats as needed
+        try:
+            return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    
+    print(f" Invalid date format: {date_str}")
+    return None  # Return None if no valid format is found
+
+
+def get_user(user_id):
+    """Fetch User object or return None if invalid."""
+    if user_id and user_id.isdigit():
+        return User.objects.filter(id=int(user_id)).first()
+    return None
+from datetime import datetime
+
+def convert_time(time_str):
+    """Convert time from various formats to HH:MM:SS."""
+    if not time_str or time_str.strip() == "":
+        return None  # Handle empty values
+    
+    for fmt in ("%I:%M %p", "%I:%M:%S %p", "%H:%M", "%H:%M:%S"):  # Common time formats
+        try:
+            return datetime.strptime(time_str, fmt).strftime("%H:%M:%S")
+        except ValueError:
+            continue
+    
+    print(f" Invalid time format: {time_str}")
+    return None  # Return None if no valid format is found

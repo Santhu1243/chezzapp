@@ -7,7 +7,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 from .views import all_data, export_issues_csv  
 from .views import profile, change_password
-
+from .views import upload_issues
+from .views import chardet
 
 app_name = 'nonsap'
 
@@ -46,6 +47,7 @@ urlpatterns = [
     path("superuser/all/", views.all_data, name='all_data'),
     path('export-issues-csv/', export_issues_csv, name='export_issues_csv'),
     path('profile/change-password/', change_password, name='change_password'),
+    path('upload/', upload_issues, name='upload_issues')
 
 
 ]

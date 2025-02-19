@@ -1,0 +1,12 @@
+<form method="post" action="{% url 'nonsap:upload_issues' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv_file" accept=".csv" required>
+    <button type="submit">Upload</button>
+</form>
+
+
+{% if form.errors %}
+<div style="color: red;">
+    {{ form.errors }}
+</div>
+{% endif %}
