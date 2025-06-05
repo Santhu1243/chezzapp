@@ -40,6 +40,9 @@
 
         width: 100%;
     }
+.r-c-btn {
+    font-size: 16px;
+}
 }
 
 @keyframes rotate {
@@ -235,6 +238,7 @@ li.no-comments {
 
 a {
     color: #003986;
+    text-decoration: none !important;
 }
 
 .staff-bg {
@@ -277,10 +281,12 @@ img.img-fluid.rotate-img {
     object-fit: cover;
     animation: rotate 5s cubic-bezier(0.33, 0.27, 0.69, 0.76) infinite;
 }
-td.reassign {
+
+.reassign {
     display: flex;
 }
 
+/* profile */
 .profile-container {
     max-width: 600px;
     margin: 50px auto;
@@ -296,4 +302,31 @@ td.reassign {
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #007bff;
+}
+
+.box.bg-primary {
+    background: #002d86 !important;
+}
+
+a.box.active {
+    border: 2px solid white;
+    box-shadow: 1px 1px 10px 1px black;
+}
+@media screen and (max-width: 768px) {
+    .box {
+        padding: 5px;
+        margin: 5px;
+        font-size: 16px;
+        border-radius: 5px;
+        box-shadow: 1px 0px 2px #00000063;
+    }
+
+    .issuebox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 3px;
+    }
+a.box h4 {
+    font-size: 14px;
+}
+
 }

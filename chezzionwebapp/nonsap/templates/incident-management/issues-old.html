@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block start %}
+<div class="container">
+    {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+    <div class="container mt-5 mb-5 issuebox-grid">
+        <div class="box bg-warning">
+            <h4 class="text-center">Issue Raised</h4>
+            {{ total_issues }}
+        </div>
+        <div class="box bg-danger">
+            <h4 class="text-center">Active</h4>
+            {{ active_issues }}
+        </div>
+        <div class="box bg-success">
+            <h4 class="text-center">Resolved</h4>
+            {{ resolved_issues }}
+        </div>
+
+        <div class="box text-dark">
+            <a href="{% url 'nonsap:raise-issue' %}" class="text-decoration-none" target="_blank">
+                <h4 class="text-center">Raise Complaint</h4>
+                <i class="fa-solid fa-plus"></i>
+            </a>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Sl. No</th>
+                <th scope="col">Issue Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Date</th>
+                <th scope="col">Time</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ issue.issue }}</td>
+                <td>{{ issue.description }}</td>
+                <td>{{ issue.report_date }}</td>
+                <td>{{ issue.report_time }}</td>
+                <td>{{ issue.status }}</td>
+                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-danger mt-5">
+        <h4 class="text-center">You do not have permission to view this page.</h4>
+    </div>
+    {% endif %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if issues.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ issues.previous_page_number }}">previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ issues.number }} of {{ issues.paginator.num_pages }}.
+            </span>
+            {% if issues.has_next %}
+            <a href="?page={{ issues.next_page_number }}">next</a>
+            <a href="?page={{ issues.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div>
+{% endblock %}

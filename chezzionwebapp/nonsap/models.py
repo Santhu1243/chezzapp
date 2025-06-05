@@ -9,6 +9,7 @@ STATUS_CHOICES = [
     ('resolved', 'Resolved'),
 ]
 PRIORITY_CHOICES = [
+    ('P0', 'Critical'),
     ('P1', 'P1 - High'),
     ('P2', 'P2 - Medium'),
     ('P3', 'P3 - Low'),
@@ -41,7 +42,10 @@ class IncidentIssue(models.Model):
          default='active',
      )
     company_name = models.CharField(max_length=255, default="unknown")
-    resolutionDate = models.DateField(null=True)
+    resolutionDate = models.DateField(null=True, blank=True)  
+    resolutionTime = models.TimeField(null=True, blank=True)
+    status_changed_at = models.DateTimeField(auto_now=True)  
+
     
 
     def save(self, *args, **kwargs):
@@ -61,7 +65,7 @@ class IncidentIssue(models.Model):
 class IncidentIssueForm(forms.ModelForm):
     class Meta:
         model = IncidentIssue
-        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'company_name', 'resolutionDate', 'priority']
+        fields = ['issue', 'description', 'email', 'report_date', 'report_time', 'attachment', 'company_name', 'resolutionDate', 'priority' , 'resolutionTime']
 
 
 class Issue(models.Model):
@@ -73,6 +77,7 @@ class Issue(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     PRIORITY_CHOICES = [
+        ('P0', 'Critical'),
         ('P1', 'P1 - High'),
         ('P2', 'P2 - Medium'),
         ('P3', 'P3 - Low'),
@@ -145,3 +150,63 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+from .forms import IssueUploadForm
+
+def upload_issues(request):
+    if request.method == "POST":
+        form = IssueUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.reader(decoded_file)
+
+            for row in reader:
+                if len(row) >= 2:  # Ensure there are at least two columns
+                    Issue.objects.create(
+                        title=row[0],
+                        description=row[1]
+                    )
+            return redirect('issue_list')  
+
+    else:
+        form = IssueUploadForm()
+    return render(request, 'upload_issues.html', {'form': form})
+
+from django import forms
+from django.contrib.auth.models import User
+
+from django import forms
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        label="Old Password"
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        label="New Password"
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        label="Confirm New Password"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        old_password = cleaned_data.get("old_password")
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if self.user and not self.user.check_password(old_password):
+            raise forms.ValidationError("Old password is incorrect.")
+
+        if new_password != confirm_password:
+            raise forms.ValidationError("New passwords do not match.")
+
+        return cleaned_data

@@ -1,0 +1,42 @@
+<div class="table-responsive">
+    <table id="issuesTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')"># <i id="sort-icon-0"
+                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Complaint ID <i id="sort-icon-1"
+                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Title <i id="sort-icon-2"
+                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Date <i id="sort-icon-3"
+                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Time <i id="sort-icon-4"
+                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Status <i id="sort-icon-5"
+                            class="fas fa-sort"></i></button></th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ issue.custom_id }}</td>
+                <td>{{ issue.issue }}</td>
+                <td data-type="date">{{ issue.report_date }}</td>
+                <td data-type="time">{{ issue.report_time }}</td>
+                <td>
+                    {% if issue.status == 'active' %}
+                    <button class="btn btn-danger">{{ issue.status }}</button>
+                    {% elif issue.status == 'inprogress' %}
+                    <button class="btn btn-secondary">{{ issue.status }}</button>
+                    {% else %}
+                    <button class="btn btn-success">{{ issue.status }}</button>
+                    {% endif %}
+                </td>
+                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

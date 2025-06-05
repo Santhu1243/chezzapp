@@ -35,15 +35,29 @@
             </div>
             <!-- Issue Field -->
             <div class="form-group d-md-flex mt-5">
-                <div class="col-md-3 col-sm-12">
-                    <label for="issue-title" class="form-label">
-                        Issue
-                    </label>
-                </div>
-                <div class="col-md-9 col-sm-12">
-                    <input type="text" name="issue" id="issue-title" class="form-control" required>
-                </div>
-            </div>
+    <div class="col-md-3 col-sm-12">
+        <label for="issue-title" class="form-label">
+            Issue Category
+        </label>
+    </div>
+    <div class="col-md-9 col-sm-12">
+        <select name="issue" id="issue-title" class="form-control" required>
+            <option value="">Select a category</option>
+            <option value="TN03-Mattress-Inbound">TN03-Mattress-Inbound</option>
+            <option value="TN03-Mattress-Outbound">TN03-Mattress-Outbound</option>
+            <option value="TN03-Mattress-Reorg">TN03-Mattress-Reorg</option>
+            <option value="TN03-Mattress-Other Requests">TN03-Mattress-Other Requests</option>
+            <option value="TN03-Accessories-Inbound">TN03-Accessories-Inbound</option>
+            <option value="TN03-Accessories-Outbound">TN03-Accessories-Outbound</option>
+            <option value="TN03-Accessories-Replenishment">TN03-Accessories-Replenishment</option>
+            <option value="TN10-Furniture-Inbound">TN10-Furniture-Inbound</option>
+            <option value="TN10-Furniture-Outbound">TN10-Furniture-Outbound</option>
+            <option value="TN10-Furniture-Reorg">TN10-Furniture-Reorg</option>
+            <option value="TN10-Furniture-Other Requests">TN10-Furniture-Other Requests</option>
+        </select>
+    </div>
+</div>
+
 
             <!-- Issue Description Field -->
             <div class="form-group d-md-flex mt-5">
@@ -93,7 +107,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reportdatepicker" name="report_date" class="form-control">
+                    <input type="text" id="reportdatepicker" name="report_date" class="form-control" placeholder="" readonly>
                 </div>
             </div>
 
@@ -105,7 +119,7 @@
                     </label>
                 </div>
                 <div class="col-md-9 col-sm-12">
-                    <input type="text" id="reporttimepicker" name="report_time" class="form-control">
+                    <input type="text" id="reporttimepicker" name="report_time" class="form-control" readonly>
                 </div>
             </div>
             <!-- Priority -->
@@ -117,6 +131,7 @@
                 </div>
                 <div class="col-md-9 col-sm-12">
                     <select id="priority" name="priority" class="form-control">
+                        <option value="P0">P0 (Critical)</option>
                         <option value="P1">P1 (Resolve in 1 day)</option>
                         <option value="P2">P2 (Resolve in 3 days)</option>
                         <option value="P3">P3 (Resolve in 6-7 days)</option>
@@ -146,7 +161,16 @@
                     <input type="text" id="resolutionDate" name="resolutionDate" readonly class="form-control">
                 </div>
             </div>
-
+            <div class="form-group d-md-flex mt-5">
+                <div class="col-md-3 col-sm-12">
+                    <label for="resolutionTime" class="form-label">
+                        Resolution Time
+                    </label>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    <input type="text" id="resolutionTime" name="resolutionTime" class="form-control">
+                </div>
+            </div>
             <!-- Attachments Field -->
             <div class="form-group d-md-flex mt-5">
                 <div class="col-md-3 col-sm-12">
@@ -217,9 +241,9 @@
         form.addEventListener('submit', function () {
             // Show the loading icon when the form is submitted
             loadingIcon.style.display = 'block';
-            submitBtn.disabled = true; // Prevent further submissions
+            submitBtn.disabled = true; 
         });
-        validateForm(); // Initial validation check
+        validateForm(); 
     });
 </script>
 <script>
@@ -238,8 +262,8 @@
         function updateResolutionDate() {
             let priority = $('#priority').val();
             let daysToAdd;
-
-            if (priority === "P1") daysToAdd = 1;
+            if (priority === "P0") daysToAdd = 0;
+            else if (priority === "P1") daysToAdd = 1;
             else if (priority === "P2") daysToAdd = 3;
             else if (priority === "P3") daysToAdd = 6;
             else if (priority === "P4") daysToAdd = parseInt($('#days').val());
@@ -269,5 +293,19 @@
         // Set initial resolution date
         updateResolutionDate();
     });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#resolutionTime").timepicker({
+            timeFormat: 'HH:mm',
+            interval: 30,
+            minTime: '00:00',
+            maxTime: '23:59',
+            dynamic: false,
+            dropdown: true,
+            scrollbar: true
+        });
+    });
+
 </script>
 {% endblock %}

@@ -2,38 +2,46 @@
 {% block start %}
 <div class="container">
     {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-    <div class="container mt-5 mb-5 issuebox-grid">
-        <div class="box bg-warning">
-            <h4 class="text-center">Issue Raised</h4>
-            {{ total_issues }}
+    <div class="container mt-5 mb-5 issuebox-grid row">
+        <div class="col-md-3 mb-3">
+            <div class="box bg-warning p-3 text-center rounded text-white">
+                <h4>Issue Raised</h4>
+                {{ total_issues }}
+            </div>
         </div>
-        <div class="box bg-danger">
-            <h4 class="text-center">Active</h4>
-            {{ active_issues }}
+        <div class="col-md-3 mb-3">
+            <div class="box bg-danger p-3 text-center rounded text-white">
+                <h4>Active</h4>
+                {{ active_issues }}
+            </div>
         </div>
-        <div class="box bg-success">
-            <h4 class="text-center">Resolved</h4>
-            {{ resolved_issues }}
+        <div class="col-md-3 mb-3">
+            <div class="box bg-success p-3 text-center rounded text-white">
+                <h4>Resolved</h4>
+                {{ resolved_issues }}
+            </div>
         </div>
-
-        <div class="box text-dark">
-            <a href="{% url 'nonsap:raise-issue' %}" class="text-decoration-none" target="_blank">
-                <h4 class="text-center">Raise Complaint</h4>
-                <i class="fa-solid fa-plus"></i>
-            </a>
+        <div class="col-md-3 mb-3">
+            <div class="box bg-light p-3 text-center rounded">
+                <a href="{% url 'nonsap:raise-issue' %}" class="text-decoration-none d-block text-dark" target="_blank">
+                    <h4>Raise Complaint</h4>
+                    <i class="fa-solid fa-plus fa-2x mt-2"></i>
+                </a>
+            </div>
         </div>
     </div>
 
-    <table class="table table-striped">
+    <!-- Desktop Table -->
+    <table class="table table-striped d-none d-md-table">
         <thead>
             <tr>
-                <th scope="col">Sl. No</th>
-                <th scope="col">Issue Title</th>
-                <th scope="col">Description</th>
-                <th scope="col">Date</th>
-                <th scope="col">Time</th>
-                <th scope="col">Status</th>
-                <th scope="col">Action</th>
+                <th>Sl. No</th>
+                <th>Issue Title</th>
+                <th>Description</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -45,17 +53,35 @@
                 <td>{{ issue.report_date }}</td>
                 <td>{{ issue.report_time }}</td>
                 <td>{{ issue.status }}</td>
-                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+                <td><a class="btn btn-primary btn-sm" href="{% url 'nonsap:view_status' issue.id %}">View</a></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Mobile Cards -->
+    <div class="d-block d-md-none">
+        {% for issue in issues %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ issue.issue }}</h5>
+                <p class="card-text"><strong>Description:</strong> {{ issue.description }}</p>
+                <p class="card-text"><strong>Date:</strong> {{ issue.report_date }}</p>
+                <p class="card-text"><strong>Time:</strong> {{ issue.report_time }}</p>
+                <p class="card-text"><strong>Status:</strong> {{ issue.status }}</p>
+                <a class="btn btn-primary btn-sm" href="{% url 'nonsap:view_status' issue.id %}">View Status</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     {% else %}
     <div class="alert alert-danger mt-5">
         <h4 class="text-center">You do not have permission to view this page.</h4>
     </div>
     {% endif %}
-    <div class="pagination">
+
+    <!-- Pagination -->
+    <div class="pagination mt-4">
         <span class="step-links">
             {% if issues.has_previous %}
             <a href="?page=1">&laquo; first</a>
@@ -70,6 +96,5 @@
             {% endif %}
         </span>
     </div>
-
 </div>
 {% endblock %}
