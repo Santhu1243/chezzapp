@@ -27,7 +27,7 @@ class IncidentIssue(models.Model):
     report_time = models.TimeField()
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True)
-    assigned_date = models.DateTimeField(default="2021-09-01 00:00:00")
+    assigned_date = models.DateTimeField(default=timezone.now)
     attachment = models.FileField(upload_to='uploads/', null=True, blank=True)
     root_cause = models.TextField(default="No root cause provided")
     status = models.CharField(
@@ -42,6 +42,9 @@ class IncidentIssue(models.Model):
      )
     company_name = models.CharField(max_length=255, default="unknown")
     resolutionDate = models.DateField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status_changed_at = models.DateTimeField(auto_now=True)
+
     
 
     def save(self, *args, **kwargs):
@@ -72,6 +75,7 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    status_changed_at = models.DateTimeField(default=timezone.now)
     PRIORITY_CHOICES = [
         ('P1', 'P1 - High'),
         ('P2', 'P2 - Medium'),

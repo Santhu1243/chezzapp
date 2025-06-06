@@ -18,6 +18,7 @@ from .models import Issue, User
 from .models import Issue  
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
+from datetime import timedelta
 from .models import Attachment
 from django.urls import path
 from .models import IncidentIssue, User
@@ -27,6 +28,9 @@ from django.db.models import F
 from .forms import StaffLoginForm, SuperAdminLoginForm
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Home view
 @login_required
