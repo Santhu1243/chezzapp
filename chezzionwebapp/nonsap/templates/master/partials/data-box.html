@@ -3,16 +3,24 @@
         <h4 class="text-center">Issue Raised</h4>
         {{ total_issues }}
     </a>
-    <a href="?status=active" class="box bg-danger {% if status_filter == 'active' %}active{% endif %}">
+    <a href="?status=active" class="box bg-primary {% if status_filter == 'active' and priority != 'critical' %}active{% endif %}">
         <h4 class="text-center">Active</h4>
         {{ active_issues }}
     </a>
-    <a href="?status=inprogress" class="box bg-primary {% if status_filter == 'inprogress' %}active{% endif %}">
+    <a href="?priority=critical"
+   class="box bg-danger {% if priority == 'critical' %}active{% endif %}">
+    <h4 class="text-center">Critical</h4>
+    {{ critical_issues }}
+</a>
+
+
+    <a href="?status=inprogress" class="box bg-secondary {% if status_filter == 'inprogress' %}active{% endif %}">
         <h4 class="text-center">In Progress</h4>
         {{ inprogress_issues }}
     </a>
-    <a href="?status=resolved" class=" box bg-success {% if status_filter == 'resolved' %}active{% endif %}">
+    <a href="?status=resolved" class="box bg-success {% if status_filter == 'resolved' %}active{% endif %}">
         <h4 class="text-center">Resolved</h4>
         {{ resolved_issues }}
     </a>
 </div>
+

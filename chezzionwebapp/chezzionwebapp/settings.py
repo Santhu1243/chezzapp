@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'nonsap',
     'pwa',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -187,3 +188,12 @@ PWA_APP_SPLASH_SCREEN = [
     {"src": "static/icons/splash-640x1136.png", "media": "(device-width: 320px)"},
     {"src": "static/icons/splash-750x1334.png", "media": "(device-width: 375px)"},
 ]
+
+
+# Celery Settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Celery Beat
+CELERY_BEAT_SCHEDULE = {}
+CELERY_TIMEZONE = 'Asia/Kolkata'  
