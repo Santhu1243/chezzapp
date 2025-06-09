@@ -1,19 +1,14 @@
-<div class="table-responsive">
+<!-- Table for medium and larger screens -->
+<div class="table-responsive d-none d-md-block">
     <table id="issuesTable" class="table table-striped">
         <thead>
             <tr>
-                <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')"># <i id="sort-icon-0"
-                            class="fas fa-sort"></i></button></th>
-                <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Complaint ID <i id="sort-icon-1"
-                            class="fas fa-sort"></i></button></th>
-                <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Title <i id="sort-icon-2"
-                            class="fas fa-sort"></i></button></th>
-                <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Date <i id="sort-icon-3"
-                            class="fas fa-sort"></i></button></th>
-                <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Time <i id="sort-icon-4"
-                            class="fas fa-sort"></i></button></th>
-                <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Status <i id="sort-icon-5"
-                            class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(0, 'issuesTable')"># <i id="sort-icon-0" class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(1, 'issuesTable')">Complaint ID <i id="sort-icon-1" class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(2, 'issuesTable')">Title <i id="sort-icon-2" class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(3, 'issuesTable')">Date <i id="sort-icon-3" class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(4, 'issuesTable')">Time <i id="sort-icon-4" class="fas fa-sort"></i></button></th>
+                <th><button class="sort-btn" onclick="sortTable(5, 'issuesTable')">Status <i id="sort-icon-5" class="fas fa-sort"></i></button></th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -23,20 +18,45 @@
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{ issue.custom_id }}</td>
                 <td>{{ issue.issue }}</td>
-                <td data-type="date">{{ issue.report_date }}</td>
-                <td data-type="time">{{ issue.report_time }}</td>
+                <td>{{ issue.report_date }}</td>
+                <td>{{ issue.report_time }}</td>
                 <td>
                     {% if issue.status == 'active' %}
-                    <button class="btn btn-danger">{{ issue.status }}</button>
+                    <button class="btn btn-danger w-100 text-capitalize text-center ">{{ issue.status }}</button>
                     {% elif issue.status == 'inprogress' %}
-                    <button class="btn btn-secondary">{{ issue.status }}</button>
+                    <button class="btn btn-secondary w-100 text-capitalize text-center">{{ issue.status }}</button>
                     {% else %}
-                    <button class="btn btn-success">{{ issue.status }}</button>
+                    <button class="btn btn-success w-100 text-capitalize text-center">{{ issue.status }}</button>
                     {% endif %}
                 </td>
-                <td><a class="btn btn-primary" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
+                <td><a class="btn btn-primary w-100 text-capitalize text-center" href="{% url 'nonsap:view_status' issue.id %}">View Status</a></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<!-- Cards for small screens -->
+<div class="d-md-none">
+    {% for issue in issues %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">#{{ forloop.counter }} - {{ issue.custom_id }}</h5>
+            <p><strong>Title:</strong> {{ issue.issue }}</p>
+            <p><strong>Date:</strong> {{ issue.report_date }}</p>
+            <p><strong>Time:</strong> {{ issue.report_time }}</p>
+            <p>
+                <strong>Status:</strong>
+                {% if issue.status == 'active' %}
+                <span class="badge bg-danger text-capitalize">{{ issue.status }}</span>
+                {% elif issue.status == 'inprogress' %}
+                <span class="badge bg-secondary text-capitalize">{{ issue.status }}</span>
+                {% else %}
+                <span class="badge bg-success text-capitalize">{{ issue.status }}</span>
+                {% endif %}
+            </p>
+            <a href="{% url 'nonsap:view_status' issue.id %}" class="btn btn-primary text-capitalize">View Status</a>
+        </div>
+    </div>
+    {% endfor %}
 </div>

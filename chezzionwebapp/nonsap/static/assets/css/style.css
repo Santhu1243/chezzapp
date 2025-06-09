@@ -40,6 +40,10 @@
 
         width: 100%;
     }
+.r-c-btn
+ {
+    font-size: 16px;
+}
 }
 
 @keyframes rotate {
@@ -308,4 +312,40 @@ img.img-fluid.rotate-img {
 a.box.active {
     border: 2px solid white;
     box-shadow: 1px 1px 10px 1px black;
+}
+@media screen and (max-width: 768px) {
+    .box {
+        padding: 5px;
+        margin: 5px;
+        font-size: 16px;
+        border-radius: 5px;
+        box-shadow: 1px 0px 2px #00000063;
+    }
+
+    .issuebox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 3px;
+    }
+a.box h4 {
+    font-size: 14px;
+}
+
+}
+button {
+    text-transform: capitalize;
+}
+.pass-change-box {
+    width: 600px;
+    padding: 16px;
+    border: 3px solid #fda138;
+    border-radius: 10px;
+    background: #f8f9fa;
+    box-shadow: 1px 5px 25px 2px #989897;
+}
+@media only screen and (max-width: 600px){
+
+.pass-change-box {
+    width: 90%;
+   
+}
 }

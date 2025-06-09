@@ -3,7 +3,7 @@
 {% block start %}
 <div class="container mt-5">
     {% if user.is_authenticated %}
-    <h1 class="text-center">Issue Details</h1>
+    <h1 class="text-center">Summary</h1>
     <table class="table table-bordered mt-4">
         <thead>
             <tr>
@@ -68,7 +68,8 @@
                 <td><strong>Status</strong></td>
                 <td>
                     {% if issue.status == "resolved" %}
-                    <span class="text-success fw-bold">Resolved by {{ issue.assigned_to.username }}</span>
+                    <span class="text-success fw-bold">Resolved by {{ issue.assigned_to.username }} on {{ issue.status_changed_at }}</span>
+                    <br>
                     <span class="text-danger fw-bold">update the status to reopen the complaint</span>
                     {% include 'master/partials/status_update_form.html' %}
                     {% else %}
