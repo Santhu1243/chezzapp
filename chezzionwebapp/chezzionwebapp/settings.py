@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'nonsap',
     'pwa',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -187,3 +188,21 @@ PWA_APP_SPLASH_SCREEN = [
     {"src": "static/icons/splash-640x1136.png", "media": "(device-width: 320px)"},
     {"src": "static/icons/splash-750x1334.png", "media": "(device-width: 375px)"},
 ]
+
+
+# Celery Settings
+# Celery Beat
+CELERY_TIMEZONE = 'Asia/Kolkata'  
+
+
+from celery.schedules import crontab
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'check-overdue-issues-every-5-minutes': {
+        'task': 'nonsap.tasks.check_and_alert_overdue_issues',
+        'schedule': crontab(minute='*/5'),
+    },
+}

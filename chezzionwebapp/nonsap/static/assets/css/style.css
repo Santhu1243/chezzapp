@@ -91,7 +91,7 @@ img.nav-logo {
     justify-items: center;
     align-items: center;
     justify-content: center;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
 }
 
@@ -105,11 +105,12 @@ img.nav-logo {
     font-size: -webkit-xxx-large;
     border-radius: 15px;
     box-shadow: 1px 0px 4px #00000063;
+    transition: ease-in-out 0.3s;
+
 }
 
 .box:hover {
-    margin-top: -10px;
-    box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.4), inset 1px 1px 10px 1px rgba(0, 0, 0, 0.4);
+    box-shadow: 5px 8px 15px 2px rgba(0, 0, 0, 0.4), inset 1px 1px 10px 1px rgba(0, 0, 0, 0.4);
 }
 
 
@@ -311,8 +312,11 @@ img.img-fluid.rotate-img {
 
 a.box.active {
     border: 2px solid white;
+    font-weight: bold;
+    color: white;
     box-shadow: 1px 1px 10px 1px black;
 }
+
 @media screen and (max-width: 768px) {
     .box {
         padding: 5px;
